@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CSWEP - Crypto Dust Sweeper</title>
-  <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -168,7 +167,7 @@
   <div class="main-content">
     <div class="top-banner">CSWEP – The Magic Crypto Sweeper</div>
     <div class="floating-wallet">
-      <button class="wallet-btn" onclick="openWalletModal()">Connect Wallet</button>
+      <button class="wallet-btn" onclick="connectWallet()">Connect Wallet</button>
     </div>
 
     <section class="hero">
@@ -176,7 +175,7 @@
       <h1>Scans wallets. Finds crumbs.
       Swaps to cash — like magic.</h1>
       <p>Recover trapped micro balances from any wallet.</p>
-      <button onclick="document.getElementById('app').scrollIntoView({ behavior: 'smooth' });">Start Sweeping</button>
+      <button onclick="scanWallet()">Start Sweeping</button>
     </section>
 
     <main id="app">
@@ -207,47 +206,52 @@
   </div>
 
   <script>
-    let provider, signer, user;
-    const tokens = [
-      { name: 'ETH (Ethereum)', symbol: 'ETH' },
-      { name: 'USDT', symbol: 'USDT' },
-      { name: 'USDC', symbol: 'USDC' },
-      { name: 'SHIBA', symbol: 'SHIBA' },
-      { name: 'MATIC', symbol: 'MATIC' },
-      { name: 'LINK', symbol: 'LINK' },
-      { name: 'DAI', symbol: 'DAI' },
-      { name: 'APE', symbol: 'APE' },
-      { name: 'GALA', symbol: 'GALA' },
-      { name: 'SAND', symbol: 'SAND' },
-      { name: 'WBTC', symbol: 'WBTC' },
-      { name: 'UNI', symbol: 'UNI' },
-      { name: 'COMP', symbol: 'COMP' },
-      { name: 'AAVE', symbol: 'AAVE' },
-      { name: 'ENS', symbol: 'ENS' }
-    ];
+    let provider, signer, userAddress;
+    const tokenContracts = {
+      USDT: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+      USDC: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606EB48',
+      SHIBA: '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE',
+      DAI: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+      LINK: '0x514910771AF9Ca656af840dff83E8264EcF986CA'
+    };
 
-    function displayInitialPlaceholders() {
-      const tbody = document.querySelector('#tokenTable tbody');
-      tbody.innerHTML = '';
-      tokens.forEach(t => {
-        const row = document.createElement('tr');
-        row.innerHTML = `<td>${t.name}</td><td>0.00000</td>`;
-        tbody.appendChild(row);
-      });
-    }
-    window.onload = displayInitialPlaceholders;
-
-    async function openWalletModal() {
+    async function connectWallet() {
       if (window.ethereum) {
-        try {
-          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-          alert("Wallet connected: " + accounts[0]);
-        } catch (err) {
-          alert("Connection rejected.");
-        }
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        signer = provider.getSigner();
+        userAddress = await signer.getAddress();
+        alert("Wallet connected: " + userAddress);
       } else {
         alert("MetaMask not found. Please install it.");
       }
+    }
+
+    async function scanWallet() {
+      if (!signer || !userAddress) {
+        alert("Please connect your wallet first.");
+        return;
+      }
+      const tbody = document.querySelector('#tokenTable tbody');
+      tbody.innerHTML = '';
+
+      const ethBalance = await provider.getBalance(userAddress);
+      const ethValue = parseFloat(ethers.utils.formatEther(ethBalance));
+      appendRow('ETH (Ethereum)', ethValue);
+
+      for (const [name, address] of Object.entries(tokenContracts)) {
+        const contract = new ethers.Contract(address, ["function balanceOf(address) view returns (uint256)", "function decimals() view returns (uint8)"], provider);
+        const balance = await contract.balanceOf(userAddress);
+        const decimals = await contract.decimals();
+        const formatted = parseFloat(ethers.utils.formatUnits(balance, decimals));
+        appendRow(name, formatted);
+      }
+    }
+
+    function appendRow(token, balance) {
+      const row = document.createElement('tr');
+      row.innerHTML = `<td>${token}</td><td>${balance.toFixed(6)}</td>`;
+      document.querySelector('#tokenTable tbody').appendChild(row);
     }
 
     function showSweepResult() {
