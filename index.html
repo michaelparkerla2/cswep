@@ -259,7 +259,9 @@
     function simulateSweep() {
       const selected = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'));
       const tokensSwept = selected.map(el => el.parentElement.textContent.trim());
-      alert(`Sweeping crumbs from: ${tokensSwept.join(', ')}\n\n✅ Success! You reclaimed $5.85 worth of stuck crypto.`);
+      const sweptList = tokensSwept.join(', ');
+      const message = `✨ Sweeping crumbs from: ${sweptList}\n\n✅ Success! You reclaimed $5.85 worth of stuck crypto.\n\nBETA TEST VERSION!\nNo Balances Swept. Launch Coming Soon!`;
+      alert(message);
     }
 
     window.onload = renderTokenTable;
