@@ -39,17 +39,16 @@
       width: 100%;
     }
     .top-banner {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
       text-align: center;
-      padding: 10px 20px;
-      font-size: 2.4rem;
+      padding: 10px;
+      font-size: 2.8rem;
       font-weight: 700;
       color: white;
       background: #0e0e0e;
+      position: fixed;
+      width: 100%;
+      left: 240px;
+      z-index: 1000;
     }
     .floating-wallet {
       position: fixed;
@@ -74,14 +73,13 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 85vh;
+      height: 90vh;
       text-align: center;
-      padding: 60px 20px 20px;
+      padding: 20px 20px 0;
     }
     .hero img {
       max-width: 200px;
       margin-bottom: 10px;
-      margin-top: 30px;
     }
     .hero h1 {
       font-size: 2rem;
@@ -132,6 +130,10 @@
       font-size: 0.95rem;
       margin-top: 30px;
     }
+    .dropdown-section {
+      margin: 50px;
+      text-align: center;
+    }
     .social-footer {
       display: flex;
       justify-content: center;
@@ -140,36 +142,13 @@
       background: #0a0a0a;
       border-top: 1px solid #222;
     }
-    .social-footer a {
-      color: white;
-      font-size: 0.95rem;
-      text-decoration: none;
+    .social-footer img {
+      width: 28px;
+      filter: brightness(0.9);
+      transition: 0.2s;
     }
-    .modal {
-      position: fixed;
-      top: 25%;
-      left: 50%;
-      transform: translate(-50%, -25%);
-      background: #222;
-      padding: 30px;
-      border: 2px solid #0a65ff;
-      border-radius: 20px;
-      text-align: center;
-      display: none;
-      z-index: 1000;
-      width: 90%;
-      max-width: 400px;
-    }
-    .modal button {
-      background: none;
-      border: none;
-      color: #0a65ff;
-      font-size: 24px;
-      font-weight: bold;
-      position: absolute;
-      top: 10px;
-      right: 20px;
-      cursor: pointer;
+    .social-footer img:hover {
+      filter: brightness(1.5);
     }
   </style>
 </head>
@@ -186,10 +165,8 @@
     <a href="#">⚖️ Legal</a>
     <a href="#" title="Coming Soon...">🧰 Dev Tools</a>
   </div>
-
   <div class="main-content">
     <div class="top-banner">CSWEP – The Magic Crypto Sweeper</div>
-
     <div class="floating-wallet">
       <button class="wallet-btn" onclick="openWalletModal()">Connect Wallet</button>
     </div>
@@ -205,7 +182,6 @@
     <main id="app">
       <h2>Free stuck crypto. Convert to cash. No gas!</h2>
       <p class="subtitle">Sweep dust tokens into real value. Powered by CSWEP.</p>
-
       <div class="card">
         <div class="scrollable-table">
           <table id="tokenTable">
@@ -215,37 +191,19 @@
         </div>
         <button class="sweep-btn" onclick="showSweepResult()">Sweep My Crumbs</button>
       </div>
-
       <div class="mission-text">
         We use special technology to magically deliver users a cash-out experience — converting trapped micro balances into CSWEP tokens or stablecoins, no gas required.
       </div>
     </main>
 
     <footer class="social-footer">
-      <a href="#">X</a>
-      <a href="#">Facebook</a>
-      <a href="#">Telegram</a>
-      <a href="#">YouTube</a>
-      <a href="#">Instagram</a>
-      <a href="#">LinkedIn</a>
+      <a href="#"><img src="icons/x.svg" alt="X"></a>
+      <a href="#"><img src="icons/facebook.svg" alt="Facebook"></a>
+      <a href="#"><img src="icons/telegram.svg" alt="Telegram"></a>
+      <a href="#"><img src="icons/youtube.svg" alt="YouTube"></a>
+      <a href="#"><img src="icons/instagram.svg" alt="Instagram"></a>
+      <a href="#"><img src="icons/linkedin.svg" alt="LinkedIn"></a>
     </footer>
-  </div>
-
-  <!-- Wallet Modal -->
-  <div id="walletModal" class="wallet-modal" style="display:none; position:fixed; top:25%; left:50%; transform:translate(-50%,-25%); background:#222; padding:30px; border:2px solid #0a65ff; border-radius:20px; text-align:center; z-index:1000; width:90%; max-width:400px;">
-    <button style="position:absolute; top:10px; right:20px; background:none; border:none; color:#0a65ff; font-size:24px; font-weight:bold; cursor:pointer;" onclick="closeWalletModal()">✖</button>
-    <h3>Choose Wallet</h3>
-    <button class="wallet-option" onclick="connectMetaMask()">MetaMask</button>
-    <button class="wallet-option" onclick="connectWalletConnect()">WalletConnect</button>
-    <p style="font-size: 0.85em; color: #aaa; margin-top: 10px;">WalletConnect works with Trust Wallet, Rainbow, etc.</p>
-  </div>
-
-  <!-- Sweep Modal -->
-  <div id="modal" class="modal">
-    <button onclick="closeModal()">✖</button>
-    <h2>Sweep Complete!</h2>
-    <p id="recoveredText">You recovered $X.XX in value!</p>
-    <p>You’ll receive CSWEP tokens in your wallet which you can swap for stablecoins or hold for rewards.</p>
   </div>
 
   <script>
@@ -279,25 +237,22 @@
     }
     window.onload = displayInitialPlaceholders;
 
-    function openWalletModal() {
-      document.getElementById("walletModal").style.display = "block";
+    async function openWalletModal() {
+      if (window.ethereum) {
+        try {
+          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+          alert("Wallet connected: " + accounts[0]);
+        } catch (err) {
+          alert("Connection rejected.");
+        }
+      } else {
+        alert("MetaMask not found. Please install it.");
+      }
     }
-    function closeWalletModal() {
-      document.getElementById("walletModal").style.display = "none";
-    }
-    function closeModal() {
-      document.getElementById("modal").style.display = "none";
-    }
-    function connectMetaMask() {
-      alert("MetaMask connection logic here");
-    }
-    function connectWalletConnect() {
-      alert("WalletConnect logic here");
-    }
+
     function showSweepResult() {
-      const val = (Math.random() * 8 + 0.5).toFixed(2);
-      document.getElementById("recoveredText").innerText = `You recovered $${val} in value!`;
-      document.getElementById("modal").style.display = "block";
+      const amount = (Math.random() * 10 + 1).toFixed(2);
+      alert("✅ Success! You swept your crumbs and reclaimed $" + amount + " in value.\n\nThis would now be converted into CSWEP tokens or stablecoins.");
     }
   </script>
 </body>
