@@ -2,11 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CSWEP – Dust Sweeper</title>
-  <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CSWEP – Dust Sweeper Beta</title>
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -162,7 +161,6 @@
     .social-footer img:hover {
       opacity: 1;
     }
-
     @media (max-width: 768px) {
       .sidebar { position: relative; width: 100%; height: auto; flex-direction: row; flex-wrap: wrap; justify-content: center; }
       .sidebar a { flex: 1 1 45%; text-align: center; }
@@ -179,13 +177,9 @@
     <a href="#">💰 Buy CSWEP</a>
     <a href="#">📄 Whitepaper</a>
     <a href="#">🧠 FAQ</a>
-    <a href="#">🎁 Airdrops</a>
-    <a href="#">🔐 Security</a>
-    <a href="#">🧭 Roadmap</a>
-    <a href="#">⚖️ Legal</a>
   </div>
 
-  <div class="top-banner">CSWEP – The Magic Dust Sweeper</div>
+  <div class="top-banner">CSWEP – The Magic Dust Sweeper (Beta)</div>
   <div class="floating-wallet">
     <button class="wallet-btn" onclick="connectWallet()">Connect Wallet</button>
   </div>
@@ -194,87 +188,78 @@
     <div class="hero">
       <img src="cswep.logo.png" alt="CSWEP Logo">
       <h1>Find the Unfindable. Sweep the Unsweepable.</h1>
-      <p>We scan your wallet for stuck tokens worth under $7.77 — and get you your crypto back.</p>
+      <p>We scan your wallet for stuck tokens under $7.77 and let you sweep them — no gas, no stress.</p>
     </div>
 
     <div class="card">
-      <h2>Beta Dust Recovery Tool</h2>
-      <p class="subtitle">Choose the crumbs you want to sweep. Grey = not sweepable or no balance.</p>
+      <h2>Dust Token Recovery</h2>
+      <p class="subtitle">Live wallet scan. Check what to sweep. Grey = zero or blocked.</p>
       <div class="scrollable-table">
         <table id="tokenTable">
           <thead>
-            <tr><th>Select</th><th>Token</th><th>Balance</th></tr>
+            <tr><th>Select</th><th>Token</th><th>Balance</th><th>Value (USD)</th></tr>
           </thead>
           <tbody></tbody>
         </table>
       </div>
       <button class="sweep-btn" onclick="simulateSweep()">Sweep My Crumbs</button>
-      <p class="mission-text">
-        This is a beta simulation only. Real sweeps will launch soon.  
-        No gas required. No balances swept. Your tokens are safe.
-      </p>
+      <p class="mission-text">Beta only. Tokens not moved. No real sweep yet — just proof of concept.</p>
     </div>
   </div>
 
   <div class="social-footer">
-    <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/twitter.png" alt="Twitter" /></a>
-    <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/telegram-app.png" alt="Telegram" /></a>
-    <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/youtube-play.png" alt="YouTube" /></a>
-    <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/instagram-new.png" alt="Instagram" /></a>
+    <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/twitter.png" alt="Twitter"/></a>
+    <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/telegram-app.png" alt="Telegram"/></a>
+    <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/youtube-play.png" alt="YouTube"/></a>
   </div>
 
   <script>
     let provider, signer, userAddress;
+    const COVALENT_API_KEY = "ckey_demo"; // Replace with your key later
 
     async function connectWallet() {
       if (window.ethereum) {
-        try {
-          provider = new ethers.providers.Web3Provider(window.ethereum);
-          await provider.send("eth_requestAccounts", []);
-          signer = provider.getSigner();
-          userAddress = await signer.getAddress();
-          alert("Wallet connected: " + userAddress);
-        } catch (error) {
-          console.error("User rejected the request");
-        }
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        signer = provider.getSigner();
+        userAddress = await signer.getAddress();
+        alert("Wallet connected: " + userAddress);
+        fetchTokenBalances(userAddress);
       } else {
-        alert("MetaMask is not installed.");
+        alert("MetaMask not detected");
       }
     }
 
-    const tokens = [
-      { name: 'ETH', symbol: 'ETH', balance: 0.0012 },
-      { name: 'USDT', symbol: 'USDT', balance: 0.0000 },
-      { name: 'USDC', symbol: 'USDC', balance: 0.0084 },
-      { name: 'MATIC', symbol: 'MATIC', balance: 0.0030 },
-      { name: 'SHIBA', symbol: 'SHIBA', balance: 0.0000 },
-      { name: 'DAI', symbol: 'DAI', balance: 0.0251 }
-    ];
-
-    function renderTokenTable() {
+    async function fetchTokenBalances(address) {
       const tbody = document.querySelector('#tokenTable tbody');
       tbody.innerHTML = '';
-      tokens.forEach(t => {
-        const row = document.createElement('tr');
-        row.className = t.balance > 0 ? '' : 'disabled-row';
-        row.innerHTML = `
-          <td><input type="checkbox" ${t.balance > 0 ? 'checked' : 'disabled'} /></td>
-          <td>${t.name}</td>
-          <td>${t.balance.toFixed(6)}</td>
-        `;
-        tbody.appendChild(row);
-      });
+      const chains = [1, 56, 137]; // Ethereum, BSC, Polygon
+      for (const chainId of chains) {
+        const res = await fetch(`https://api.covalenthq.com/v1/${chainId}/address/${address}/balances_v2/?key=${COVALENT_API_KEY}`);
+        const data = await res.json();
+        const tokens = data.data.items || [];
+        tokens.forEach(t => {
+          const value = t.quote || 0;
+          if (value < 7.77 && value > 0.000001) {
+            const row = document.createElement('tr');
+            row.className = value > 0 ? '' : 'disabled-row';
+            row.innerHTML = `
+              <td><input type="checkbox" checked /></td>
+              <td>${t.contract_ticker_symbol}</td>
+              <td>${(t.balance / 10 ** t.contract_decimals).toFixed(6)}</td>
+              <td>$${value.toFixed(2)}</td>
+            `;
+            tbody.appendChild(row);
+          }
+        });
+      }
     }
 
     function simulateSweep() {
-      const selected = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'));
-      const tokenNames = selected.map(el => el.closest('tr').children[1].textContent);
-      const sweptList = tokenNames.join(', ');
-      const message = `✨ You swept: ${sweptList}\n\n✅ Recovered: ~$5.85 in trapped dust\n\n(This is a beta simulation only)`;
-      alert(message);
+      const checked = document.querySelectorAll('input[type="checkbox"]:checked');
+      const tokens = Array.from(checked).map(el => el.closest('tr').children[1].textContent);
+      alert(`✨ Sweep Preview:\n\n${tokens.join(', ')}\n\n✅ Estimated Recovered: ~$${(tokens.length * 2.50).toFixed(2)}\n\n(Just a demo!)`);
     }
-
-    window.onload = renderTokenTable;
   </script>
 </body>
 </html>
