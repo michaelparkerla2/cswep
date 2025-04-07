@@ -14,6 +14,7 @@
     h2 { margin: 10px 0 20px 0; font-size: 1.2rem; }
     button { padding:10px 20px; margin:10px; background:#0a65ff; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold; }
     button:hover {background:#084dc1;}
+    .button-group { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
     table { width:100%; margin-top:20px; border-collapse:collapse; background:#111; border-radius:10px; overflow:hidden; }
     th, td { padding:12px; border-bottom:1px solid #333; text-align:left; }
     th { background:#1e1e1e; color:#0a65ff; }
@@ -27,14 +28,16 @@
     <h1><i>CSWEP</i> (BETA)<span class="subtitle">The Magic✨ Crypto Sweeper</span></h1>
     <h2>Free stuck crypto. Convert to cash. No gas!</h2>
     <img src="cswep.logo.png" alt="CSWEP Logo" class="logo">
-    <button onclick="connectWallet()" id="connectBtn">Connect Wallet</button>
+    <div class="button-group">
+      <button onclick="connectWallet()" id="connectBtn">Connect Wallet</button>
+      <button onclick="simulateSweep()">Sweep My Crumbs</button>
+    </div>
     <div id="walletAddress"></div>
 
     <table id="balancesTable">
       <thead><tr><th>Token</th><th>Your Balance</th></tr></thead>
       <tbody></tbody>
     </table>
-    <button onclick="simulateSweep()">Sweep My Crumbs</button>
     <p class="footer-msg">We use special technology to magically deliver users a cash-out experience — converting trapped micro balances into CSWEP tokens or stablecoins, no gas required.</p>
   </div>
 
