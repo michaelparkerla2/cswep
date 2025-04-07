@@ -13,6 +13,7 @@
       color: white;
       font-family: 'Segoe UI', sans-serif;
       display: flex;
+      flex-direction: row; /* Default for desktop */
     }
     .sidebar {
       position: fixed;
@@ -76,8 +77,8 @@
       justify-content: center;
       height: 80vh;
       text-align: center;
-      padding: 20px 20px 0 20px;
-      margin-top: 0px;
+      padding: 20px;
+      margin-top: 0;
     }
     .hero img {
       max-width: 200px;
@@ -166,52 +167,120 @@
     /* 👇 MOBILE OPTIMIZATION 👇 */
     @media (max-width: 768px) {
       body {
-        flex-direction: column;
+        flex-direction: column; /* Stack sidebar and content vertically */
       }
       .sidebar {
-        position: relative;
+        position: static; /* Remove fixed positioning */
         width: 100%;
         height: auto;
-        padding-top: 10px;
+        padding: 10px 0;
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
+        background: #101010;
       }
       .sidebar a {
-        flex: 1 1 45%;
+        flex: 1 1 33%; /* Three items per row, adjustable */
         text-align: center;
-        padding: 10px;
+        padding: 12px;
+        font-size: 0.9rem;
       }
       .main-content {
-        margin-left: 0;
+        margin-left: 0; /* Remove sidebar offset */
         width: 100%;
       }
       .top-banner {
         left: 0;
         width: 100%;
-        font-size: 2rem;
-        padding: 12px;
+        font-size: 1.8rem; /* Smaller text for mobile */
+        padding: 15px;
+        position: fixed; /* Keep it fixed at the top */
+        top: 0;
       }
       .floating-wallet {
-        top: 70px;
-        right: 20px;
+        top: auto; /* Move below banner */
+        bottom: 80px; /* Position above social footer */
+        right: 15px;
+        padding: 10px;
+      }
+      .wallet-btn {
+        padding: 10px 15px; /* Smaller button */
+        font-size: 0.9rem;
       }
       .hero {
-        margin-top: 140px;
-        height: auto;
+        height: auto; /* Allow natural height */
+        margin-top: 60px; /* Space below fixed banner */
+        padding: 20px 15px;
+      }
+      .hero img {
+        max-width: 150px; /* Smaller logo */
+      }
+      .hero h1 {
+        font-size: 1.5rem; /* Smaller heading */
+      }
+      .hero p {
+        font-size: 1rem; /* Slightly smaller text */
+        margin: 15px 0;
+      }
+      .hero button {
+        padding: 10px 18px; /* Smaller button */
+        font-size: 0.9rem;
+      }
+      main {
+        padding: 40px 15px; /* Reduced padding */
+      }
+      .card {
+        padding: 20px; /* Smaller card padding */
       }
       .scrollable-table {
-        max-height: 200px;
+        max-height: 200px; /* Smaller table height */
+      }
+      th, td {
+        padding: 10px; /* Reduced padding */
+        font-size: 0.9rem; /* Smaller text */
+      }
+      .sweep-btn {
+        padding: 10px 18px; /* Smaller button */
+        font-size: 0.9rem;
+        width: 100%; /* Full-width button */
+        margin-top: 15px;
+      }
+      .mission-text {
+        font-size: 0.85rem; /* Smaller text */
+        margin-bottom: 80px; /* Space for footer */
       }
       .social-footer {
         left: 0;
         width: 100%;
         flex-wrap: wrap;
-        gap: 10px;
+        gap: 15px;
         padding: 15px;
+        position: fixed;
+        bottom: 0;
       }
       .social-footer img {
-        width: 24px;
+        width: 24px; /* Smaller icons */
+      }
+    }
+
+    /* 👇 EXTRA SMALL SCREENS (e.g., < 480px) 👇 */
+    @media (max-width: 480px) {
+      .sidebar a {
+        flex: 1 1 50%; /* Two items per row */
+        padding: 10px;
+        font-size: 0.85rem;
+      }
+      .top-banner {
+        font-size: 1.5rem;
+      }
+      .hero h1 {
+        font-size: 1.3rem;
+      }
+      .hero p {
+        font-size: 0.9rem;
+      }
+      th, td {
+        font-size: 0.8rem;
       }
     }
   </style>
@@ -282,47 +351,25 @@
           signer = provider.getSigner();
           userAddress = await signer.getAddress();
           alert("Wallet connected: " + userAddress);
-          fetchTokenBalances(userAddress);
         } catch (error) {
-          console.error("User rejected the request", error);
-          alert("Wallet connection failed.");
+          console.error("User rejected the request");
         }
       } else {
         alert("MetaMask is not installed. Please install it to use this feature.");
       }
     }
 
-    async function fetchTokenBalances(address) {
-      const tokenList = [
-        { name: 'ETH (Ethereum)', symbol: 'ETH', decimals: 18 },
-        { name: 'USDT', symbol: 'USDT', address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', decimals: 6 },
-        { name: 'USDC', symbol: 'USDC', address: '0xA0b86991C6218B36c1D19D4a2e9Eb0cE3606eB48', decimals: 6 },
-        { name: 'DAI', symbol: 'DAI', address: '0x6B175474E89094C44Da98b954EedeAC495271d0F', decimals: 18 },
-        { name: 'SHIBA', symbol: 'SHIBA', address: '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE', decimals: 18 },
-        { name: 'MATIC', symbol: 'MATIC', address: '0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0', decimals: 18 },
-        { name: 'LINK', symbol: 'LINK', address: '0x514910771AF9Ca656af840dff83E8264EcF986CA', decimals: 18 },
-        { name: 'CRV', symbol: 'CRV', address: '0xD533a949740bb3306d119CC777fa900bA034cd52', decimals: 18 }
-      ];
+    const tokens = [
+      { name: 'ETH (Ethereum)', symbol: 'ETH', balance: 0.001231 },
+      { name: 'USDT', symbol: 'USDT', balance: 0.000000 },
+      { name: 'USDC', symbol: 'USDC', balance: 0.008452 },
+      { name: 'SHIBA', symbol: 'SHIBA', balance: 0.000000 },
+      { name: 'MATIC', symbol: 'MATIC', balance: 0.003012 },
+      { name: 'LINK', symbol: 'LINK', balance: 0.000000 },
+      { name: 'DAI', symbol: 'DAI', balance: 0.024101 }
+    ];
 
-      const erc20Abi = ["function balanceOf(address) view returns (uint256)", "function decimals() view returns (uint8)"];
-      const balances = [];
-
-      // Fetch ETH balance
-      const ethBal = await provider.getBalance(address);
-      balances.push({ name: 'ETH (Ethereum)', symbol: 'ETH', balance: parseFloat(ethers.utils.formatEther(ethBal)) });
-
-      // Fetch ERC20s
-      for (let token of tokenList.slice(1)) {
-        const contract = new ethers.Contract(token.address, erc20Abi, provider);
-        const raw = await contract.balanceOf(address);
-        const formatted = ethers.utils.formatUnits(raw, token.decimals);
-        balances.push({ name: token.name, symbol: token.symbol, balance: parseFloat(formatted) });
-      }
-
-      renderTokenTable(balances);
-    }
-
-    function renderTokenTable(tokens) {
+    function renderTokenTable() {
       const tbody = document.querySelector('#tokenTable tbody');
       tbody.innerHTML = '';
       tokens.forEach(t => {
@@ -340,11 +387,11 @@
       const selected = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'));
       const tokensSwept = selected.map(el => el.parentElement.textContent.trim());
       const sweptList = tokensSwept.join(', ');
-      const message = `✨ Sweeping crumbs from: ${sweptList}\n\n✅ Success! You reclaimed tiny balances from your wallet.\n\nBETA MODE – No tokens moved.`;
+      const message = `✨ Sweeping crumbs from: ${sweptList}\n\n✅ Success! You reclaimed $5.85 worth of stuck crypto.\n\nBETA TEST VERSION!\nNo Balances Swept. Launch Coming Soon!`;
       alert(message);
     }
 
-    window.onload = () => console.log("App ready.");
+    window.onload = renderTokenTable;
   </script>
 </body>
 </html>
