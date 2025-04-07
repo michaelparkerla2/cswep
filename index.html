@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CSWEP - Crypto Dust Sweeper</title>
+  <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -38,15 +39,16 @@
       width: 100%;
     }
     .top-banner {
+      position: fixed;
+      top: 0;
+      left: 240px;
+      width: calc(100% - 240px);
       text-align: center;
-      padding: 10px;
+      padding: 16px;
       font-size: 2.8rem;
       font-weight: 700;
       color: white;
       background: #0e0e0e;
-      position: fixed;
-      width: 100%;
-      left: 240px;
       z-index: 1000;
     }
     .floating-wallet {
@@ -72,13 +74,13 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 90vh;
+      height: 100vh;
       text-align: center;
-      padding: 20px 20px 0;
+      padding: 10px 20px 0;
     }
     .hero img {
       max-width: 200px;
-      margin-bottom: 10px;
+      margin: 0 0 10px;
     }
     .hero h1 {
       font-size: 2rem;
@@ -141,41 +143,33 @@
       background: #0a0a0a;
       border-top: 1px solid #222;
     }
-    .social-footer img {
-      width: 28px;
-      filter: brightness(0.9);
-      transition: 0.2s;
-    }
-    .social-footer img:hover {
-      filter: brightness(1.5);
+    .social-footer a {
+      color: white;
+      text-decoration: none;
     }
   </style>
 </head>
 <body>
   <div class="sidebar">
     <a href="#">🧹 Sweep Tool</a>
-    <a href="#">📈 Token Dashboard</a>
+    <a href="#app">📊 Token Scanner</a>
     <a href="#">💰 Buy CSWEP</a>
     <a href="#">🗂️ Whitepaper</a>
     <a href="#">🧠 FAQ</a>
     <a href="#">📦 Airdrops</a>
-    <a href="#">🔐 Security</a>
     <a href="#">🧭 Roadmap</a>
-    <a href="#">⚖️ Legal</a>
-    <a href="#" title="Coming Soon...">🧰 Dev Tools</a>
   </div>
   <div class="main-content">
     <div class="top-banner">CSWEP – The Magic Crypto Sweeper</div>
     <div class="floating-wallet">
-      <button class="wallet-btn" onclick="connectWallet()">Connect Wallet</button>
+      <button class="wallet-btn" onclick="openWalletModal()">Connect Wallet</button>
     </div>
 
     <section class="hero">
       <img src="cswep.logo.png" alt="CSWEP Logo">
-      <h1>Scans wallets. Finds crumbs.
-      Swaps to cash — like magic.</h1>
+      <h1>Scans wallets. Finds crumbs.\nSwaps to cash — like magic.</h1>
       <p>Recover trapped micro balances from any wallet.</p>
-      <button onclick="scanWallet()">Start Sweeping</button>
+      <button onclick="document.getElementById('app').scrollIntoView({ behavior: 'smooth' });">Start Sweeping</button>
     </section>
 
     <main id="app">
@@ -184,11 +178,11 @@
       <div class="card">
         <div class="scrollable-table">
           <table id="tokenTable">
-            <thead><tr><th>Token</th><th>Your Balance</th></tr></thead>
+            <thead><tr><th></th><th>Token</th><th>Your Balance</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
-        <button class="sweep-btn" onclick="showSweepResult()">Sweep My Crumbs</button>
+        <button class="sweep-btn" onclick="sweepSelectedTokens()">Sweep My Crumbs</button>
       </div>
       <div class="mission-text">
         We use special technology to magically deliver users a cash-out experience — converting trapped micro balances into CSWEP tokens or stablecoins, no gas required.
@@ -196,68 +190,53 @@
     </main>
 
     <footer class="social-footer">
-      <a href="#"><img src="icons/x.svg" alt="X"></a>
-      <a href="#"><img src="icons/facebook.svg" alt="Facebook"></a>
-      <a href="#"><img src="icons/telegram.svg" alt="Telegram"></a>
-      <a href="#"><img src="icons/youtube.svg" alt="YouTube"></a>
-      <a href="#"><img src="icons/instagram.svg" alt="Instagram"></a>
-      <a href="#"><img src="icons/linkedin.svg" alt="LinkedIn"></a>
+      <a href="#">X</a>
+      <a href="#">Facebook</a>
+      <a href="#">Telegram</a>
+      <a href="#">YouTube</a>
+      <a href="#">Instagram</a>
+      <a href="#">LinkedIn</a>
     </footer>
   </div>
 
   <script>
-    let provider, signer, userAddress;
-    const tokenContracts = {
-      USDT: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
-      USDC: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606EB48',
-      SHIBA: '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE',
-      DAI: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
-      LINK: '0x514910771AF9Ca656af840dff83E8264EcF986CA'
-    };
+    const tokens = [
+      { name: 'ETH (Ethereum)', symbol: 'ETH' },
+      { name: 'USDT', symbol: 'USDT' },
+      { name: 'USDC', symbol: 'USDC' },
+      { name: 'SHIBA', symbol: 'SHIBA' },
+      { name: 'MATIC', symbol: 'MATIC' },
+      { name: 'LINK', symbol: 'LINK' },
+    ];
 
-    async function connectWallet() {
-      if (window.ethereum) {
-        provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        signer = provider.getSigner();
-        userAddress = await signer.getAddress();
-        alert("Wallet connected: " + userAddress);
-      } else {
-        alert("MetaMask not found. Please install it.");
-      }
-    }
-
-    async function scanWallet() {
-      if (!signer || !userAddress) {
-        alert("Please connect your wallet first.");
-        return;
-      }
+    function displayTokenTable(balances = {}) {
       const tbody = document.querySelector('#tokenTable tbody');
       tbody.innerHTML = '';
-
-      const ethBalance = await provider.getBalance(userAddress);
-      const ethValue = parseFloat(ethers.utils.formatEther(ethBalance));
-      appendRow('ETH (Ethereum)', ethValue);
-
-      for (const [name, address] of Object.entries(tokenContracts)) {
-        const contract = new ethers.Contract(address, ["function balanceOf(address) view returns (uint256)", "function decimals() view returns (uint8)"], provider);
-        const balance = await contract.balanceOf(userAddress);
-        const decimals = await contract.decimals();
-        const formatted = parseFloat(ethers.utils.formatUnits(balance, decimals));
-        appendRow(name, formatted);
-      }
+      tokens.forEach(t => {
+        const bal = balances[t.symbol] || '0.000000';
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><input type="checkbox" class="token-checkbox" data-symbol="${t.symbol}" checked></td>
+          <td>${t.name}</td>
+          <td>${bal}</td>
+        `;
+        tbody.appendChild(row);
+      });
     }
 
-    function appendRow(token, balance) {
-      const row = document.createElement('tr');
-      row.innerHTML = `<td>${token}</td><td>${balance.toFixed(6)}</td>`;
-      document.querySelector('#tokenTable tbody').appendChild(row);
+    function openWalletModal() {
+      alert('MetaMask connection logic here');
     }
 
-    function showSweepResult() {
-      const amount = (Math.random() * 10 + 1).toFixed(2);
-      alert("✅ Success! You swept your crumbs and reclaimed $" + amount + " in value.\n\nThis would now be converted into CSWEP tokens or stablecoins.");
+    function sweepSelectedTokens() {
+      const selected = Array.from(document.querySelectorAll('.token-checkbox:checked'))
+        .map(el => el.dataset.symbol);
+      alert(`Sweeping crumbs from: ${selected.join(', ')}\n\n✨ Success! You reclaimed $5.85 worth of stuck crypto.`);
     }
+
+    window.onload = () => {
+      displayTokenTable({ ETH: '0.001231', USDT: '0.000000' });
+    };
   </script>
 </body>
 </html>
