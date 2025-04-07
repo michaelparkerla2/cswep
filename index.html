@@ -162,8 +162,6 @@
     .social-footer img:hover {
       filter: brightness(1.5);
     }
-
-    /* 👇 MOBILE OPTIMIZATION 👇 */
     @media (max-width: 768px) {
       body {
         flex-direction: column;
@@ -274,6 +272,21 @@
   <script>
     let provider, signer, userAddress;
 
+    const ERC20_ABI = [
+      "function balanceOf(address owner) view returns (uint256)",
+      "function decimals() view returns (uint8)"
+    ];
+
+    const tokenList = [
+      { name: "ETH (Ethereum)", symbol: "ETH", native: true },
+      { name: "USDT", address: "0xdAC17F958D2ee523a2206206994597C13D831ec7" },
+      { name: "USDC", address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" },
+      { name: "DAI", address: "0x6B175474E89094C44Da98b954EedeAC495271d0F" },
+      { name: "MATIC", address: "0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0" },
+      { name: "LINK", address: "0x514910771af9ca656af840dff83e8264ecf986ca" },
+      { name: "SHIBA", address: "0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE" }
+    ];
+
     async function connectWallet() {
       if (window.ethereum) {
         try {
@@ -282,6 +295,7 @@
           signer = provider.getSigner();
           userAddress = await signer.getAddress();
           alert("Wallet connected: " + userAddress);
+          await renderTokenTable();
         } catch (error) {
           console.error("User rejected the request");
         }
@@ -290,39 +304,54 @@
       }
     }
 
-    const tokens = [
-      { name: 'ETH (Ethereum)', symbol: 'ETH', balance: 0.001231 },
-      { name: 'USDT', symbol: 'USDT', balance: 0.000000 },
-      { name: 'USDC', symbol: 'USDC', balance: 0.008452 },
-      { name: 'SHIBA', symbol: 'SHIBA', balance: 0.000000 },
-      { name: 'MATIC', symbol: 'MATIC', balance: 0.003012 },
-      { name: 'LINK', symbol: 'LINK', balance: 0.000000 },
-      { name: 'DAI', symbol: 'DAI', balance: 0.024101 }
-    ];
+    async function getERC20Balance(token) {
+      const contract = new ethers.Contract(token.address, ERC20_ABI, provider);
+      const [rawBalance, decimals] = await Promise.all([
+        contract.balanceOf(userAddress),
+        contract.decimals()
+      ]);
+      return Number(ethers.utils.formatUnits(rawBalance, decimals));
+    }
 
-    function renderTokenTable() {
+    async function renderTokenTable() {
       const tbody = document.querySelector('#tokenTable tbody');
       tbody.innerHTML = '';
-      tokens.forEach(t => {
+
+      for (const token of tokenList) {
+        let balance = 0;
+
+        try {
+          if (token.native) {
+            const raw = await provider.getBalance(userAddress);
+            balance = parseFloat(ethers.utils.formatEther(raw));
+          } else {
+            balance = await getERC20Balance(token);
+          }
+        } catch (err) {
+          console.warn(`Error fetching ${token.name}:`, err);
+        }
+
         const row = document.createElement('tr');
-        row.className = t.balance > 0 ? '' : 'disabled-row';
+        row.className = balance > 0 ? '' : 'disabled-row';
         row.innerHTML = `
-          <td><input type="checkbox" ${t.balance > 0 ? 'checked' : 'disabled'} /> ${t.name}</td>
-          <td>${t.balance.toFixed(6)}</td>
+          <td><input type="checkbox" ${balance > 0 ? 'checked' : 'disabled'} /> ${token.name}</td>
+          <td>${balance.toFixed(6)}</td>
         `;
         tbody.appendChild(row);
-      });
+      }
     }
 
     function simulateSweep() {
       const selected = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'));
       const tokensSwept = selected.map(el => el.parentElement.textContent.trim());
       const sweptList = tokensSwept.join(', ');
-      const message = `✨ Sweeping crumbs from: ${sweptList}\n\n✅ Success! You reclaimed $5.85 worth of stuck crypto.\n\nBETA TEST VERSION!\nNo Balances Swept. Launch Coming Soon!`;
+      const message = `✨ Sweeping crumbs from: ${sweptList}\n\n✅ Success! You reclaimed balances from your wallet.\n\nBETA TEST VERSION!\nNo actual transfers occurred.`;
       alert(message);
     }
 
-    window.onload = renderTokenTable;
+    window.onload = () => {
+      document.querySelector('#tokenTable tbody').innerHTML = '<tr><td colspan="2">Connect your wallet to see token balances.</td></tr>';
+    };
   </script>
 </body>
 </html>
