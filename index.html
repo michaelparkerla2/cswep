@@ -3,113 +3,120 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CSWEP - Crypto Dust Sweeper</title>
+  <title>CSWEP – Dust Sweeper</title>
   <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background: #0e0e0e;
-      color: white;
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'Inter', sans-serif;
+      background: #0b0b0f;
+      color: #fff;
       display: flex;
+      flex-direction: column;
+      min-height: 100vh;
     }
     .sidebar {
       position: fixed;
-      top: 0;
       left: 0;
-      width: 240px;
-      height: 100vh;
-      background: #101010;
+      top: 0;
+      height: 100%;
+      width: 220px;
+      background: #101014;
       padding-top: 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
       z-index: 900;
     }
     .sidebar a {
-      display: block;
-      color: #ccc;
-      padding: 14px 20px;
+      padding: 12px 20px;
+      color: #aaa;
       text-decoration: none;
+      font-weight: 500;
+      transition: 0.2s;
     }
     .sidebar a:hover {
-      background: #1a1a1a;
-      color: white;
+      background: #1a1a22;
+      color: #fff;
     }
     .main-content {
-      margin-left: 240px;
-      width: 100%;
+      margin-left: 220px;
+      padding: 40px 20px;
+      flex: 1;
     }
     .top-banner {
-      text-align: center;
-      padding: 10px;
-      font-size: 2.8rem;
-      font-weight: 700;
-      color: white;
-      background: #0e0e0e;
       position: fixed;
       top: 0;
-      width: calc(100% - 240px);
+      left: 220px;
+      width: calc(100% - 220px);
+      background: #111117;
+      padding: 20px;
+      font-size: 1.8rem;
+      font-weight: 700;
+      border-bottom: 1px solid #222;
       z-index: 999;
-      left: 240px;
+      text-align: center;
     }
     .floating-wallet {
       position: fixed;
       top: 20px;
       right: 30px;
-      z-index: 1001;
+      z-index: 1000;
     }
-    .wallet-btn, .wallet-option, .hero button, .sweep-btn {
-      background: #0a65ff;
-      color: white;
+    .wallet-btn, .sweep-btn {
+      background: #2563eb;
       border: none;
-      padding: 12px 20px;
-      border-radius: 10px;
-      font-weight: bold;
+      padding: 10px 18px;
+      border-radius: 8px;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.95rem;
       cursor: pointer;
+      transition: background 0.3s;
     }
-    .wallet-btn:hover, .wallet-option:hover, .hero button:hover, .sweep-btn:hover {
-      background: #084dc1;
+    .wallet-btn:hover, .sweep-btn:hover {
+      background: #1e4ed8;
     }
     .hero {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 80vh;
+      margin-top: 120px;
       text-align: center;
-      padding: 20px 20px 0 20px;
-      margin-top: 0px;
     }
     .hero img {
-      max-width: 200px;
+      max-width: 120px;
       margin-bottom: 10px;
     }
     .hero h1 {
       font-size: 2rem;
-      white-space: pre-line;
+      font-weight: 700;
+      margin-bottom: 12px;
     }
     .hero p {
-      color: #ccc;
       font-size: 1.1rem;
-      margin: 20px 0;
-    }
-    main {
-      padding: 60px 20px;
-      max-width: 800px;
-      margin: auto;
-      text-align: center;
-    }
-    .subtitle {
       color: #ccc;
-      margin-bottom: 40px;
+      margin-bottom: 20px;
     }
     .card {
-      background: #161616;
+      background: #141419;
+      border-radius: 16px;
       padding: 30px;
-      border-radius: 20px;
+      max-width: 800px;
+      margin: 40px auto;
+      box-shadow: 0 0 12px rgba(0,0,0,0.4);
+    }
+    .card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      color: #999;
+      margin-bottom: 30px;
     }
     .scrollable-table {
       max-height: 300px;
       overflow-y: auto;
+      margin-bottom: 20px;
     }
     table {
       width: 100%;
@@ -117,102 +124,51 @@
     }
     th, td {
       padding: 14px;
-      border-bottom: 1px solid #333;
+      border-bottom: 1px solid #2c2c2f;
       text-align: left;
+      font-size: 0.95rem;
     }
     th {
-      color: #0a65ff;
-      background: #1e1e1e;
+      background: #1e1e24;
+      color: #61a5ff;
       position: sticky;
       top: 0;
       z-index: 1;
     }
     .disabled-row {
       color: #666;
-      opacity: 0.6;
+      opacity: 0.5;
     }
     .mission-text {
-      color: #aaa;
-      font-size: 0.95rem;
-      margin-top: 20px;
-      margin-bottom: 100px;
-    }
-    .dropdown-section {
-      margin: 50px;
       text-align: center;
+      font-size: 0.9rem;
+      color: #aaa;
+      margin-top: 30px;
     }
     .social-footer {
-      position: fixed;
-      bottom: 0;
-      left: 240px;
-      width: calc(100% - 240px);
+      margin-top: auto;
+      background: #0a0a0f;
+      padding: 20px;
       display: flex;
       justify-content: center;
       gap: 20px;
-      padding: 20px;
-      background: #0a0a0a;
       border-top: 1px solid #222;
-      z-index: 1000;
     }
     .social-footer img {
-      width: 28px;
-      filter: brightness(0.9);
+      width: 24px;
+      opacity: 0.8;
       transition: 0.2s;
     }
     .social-footer img:hover {
-      filter: brightness(1.5);
+      opacity: 1;
     }
 
-    /* 👇 MOBILE OPTIMIZATION 👇 */
     @media (max-width: 768px) {
-      body {
-        flex-direction: column;
-      }
-      .sidebar {
-        position: relative;
-        width: 100%;
-        height: auto;
-        padding-top: 10px;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-      }
-      .sidebar a {
-        flex: 1 1 45%;
-        text-align: center;
-        padding: 10px;
-      }
-      .main-content {
-        margin-left: 0;
-        width: 100%;
-      }
-      .top-banner {
-        left: 0;
-        width: 100%;
-        font-size: 2rem;
-        padding: 12px;
-      }
-      .floating-wallet {
-        top: 70px;
-        right: 20px;
-      }
-      .hero {
-        margin-top: 140px;
-        height: auto;
-      }
-      .scrollable-table {
-        max-height: 200px;
-      }
-      .social-footer {
-        left: 0;
-        width: 100%;
-        flex-wrap: wrap;
-        gap: 10px;
-        padding: 15px;
-      }
-      .social-footer img {
-        width: 24px;
-      }
+      .sidebar { position: relative; width: 100%; height: auto; flex-direction: row; flex-wrap: wrap; justify-content: center; }
+      .sidebar a { flex: 1 1 45%; text-align: center; }
+      .main-content { margin-left: 0; padding: 20px; }
+      .top-banner { left: 0; width: 100%; font-size: 1.5rem; }
+      .floating-wallet { top: 70px; right: 20px; }
     }
   </style>
 </head>
@@ -221,54 +177,50 @@
     <a href="#">🧹 Sweep Tool</a>
     <a href="#">📈 Token Dashboard</a>
     <a href="#">💰 Buy CSWEP</a>
-    <a href="#">🗂️ Whitepaper</a>
+    <a href="#">📄 Whitepaper</a>
     <a href="#">🧠 FAQ</a>
-    <a href="#">📦 Airdrops</a>
+    <a href="#">🎁 Airdrops</a>
     <a href="#">🔐 Security</a>
     <a href="#">🧭 Roadmap</a>
     <a href="#">⚖️ Legal</a>
-    <a href="#" title="Coming Soon...">🧰 Dev Tools</a>
   </div>
-  <div class="main-content">
-    <div class="top-banner">CSWEP – The Magic Crypto Sweeper</div>
-    <div class="floating-wallet">
-      <button class="wallet-btn" onclick="connectWallet()">Connect Wallet</button>
-    </div>
 
+  <div class="top-banner">CSWEP – The Magic Dust Sweeper</div>
+  <div class="floating-wallet">
+    <button class="wallet-btn" onclick="connectWallet()">Connect Wallet</button>
+  </div>
+
+  <div class="main-content">
     <div class="hero">
       <img src="cswep.logo.png" alt="CSWEP Logo">
-      <h1>Scans wallets. Finds crumbs.<br>Swaps to cash — like magic.</h1>
-      <p>Recover trapped micro balances from any wallet.</p>
-      <button onclick="document.getElementById('sweepSection').scrollIntoView({ behavior: 'smooth' });">Start Sweeping</button>
+      <h1>Find the Unfindable. Sweep the Unsweepable.</h1>
+      <p>We scan your wallet for stuck tokens worth under $7.77 — and get you your crypto back.</p>
     </div>
 
-    <main id="sweepSection">
-      <h2>Free stuck crypto. Convert to cash. No gas!</h2>
-      <p class="subtitle">Sweep dust tokens into real value. Powered by CSWEP.</p>
-      <div class="card">
-        <div class="scrollable-table">
-          <table id="tokenTable">
-            <thead>
-              <tr><th>Token</th><th>Your Balance</th></tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <button class="sweep-btn" onclick="simulateSweep()">Sweep My Crumbs</button>
+    <div class="card">
+      <h2>Beta Dust Recovery Tool</h2>
+      <p class="subtitle">Choose the crumbs you want to sweep. Grey = not sweepable or no balance.</p>
+      <div class="scrollable-table">
+        <table id="tokenTable">
+          <thead>
+            <tr><th>Select</th><th>Token</th><th>Balance</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
       </div>
+      <button class="sweep-btn" onclick="simulateSweep()">Sweep My Crumbs</button>
       <p class="mission-text">
-        We use special technology to magically deliver users a cash-out experience — converting trapped micro balances into CSWEP tokens or stablecoins, no gas required.
+        This is a beta simulation only. Real sweeps will launch soon.  
+        No gas required. No balances swept. Your tokens are safe.
       </p>
-    </main>
-
-    <div class="social-footer">
-      <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/twitter.png" alt="X"></a>
-      <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/facebook.png" alt="Facebook"></a>
-      <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/telegram-app.png" alt="Telegram"></a>
-      <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/youtube-play.png" alt="YouTube"></a>
-      <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/instagram-new.png" alt="Instagram"></a>
-      <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/linkedin.png" alt="LinkedIn"></a>
     </div>
+  </div>
+
+  <div class="social-footer">
+    <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/twitter.png" alt="Twitter" /></a>
+    <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/telegram-app.png" alt="Telegram" /></a>
+    <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/youtube-play.png" alt="YouTube" /></a>
+    <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/instagram-new.png" alt="Instagram" /></a>
   </div>
 
   <script>
@@ -286,18 +238,17 @@
           console.error("User rejected the request");
         }
       } else {
-        alert("MetaMask is not installed. Please install it to use this feature.");
+        alert("MetaMask is not installed.");
       }
     }
 
     const tokens = [
-      { name: 'ETH (Ethereum)', symbol: 'ETH', balance: 0.001231 },
-      { name: 'USDT', symbol: 'USDT', balance: 0.000000 },
-      { name: 'USDC', symbol: 'USDC', balance: 0.008452 },
-      { name: 'SHIBA', symbol: 'SHIBA', balance: 0.000000 },
-      { name: 'MATIC', symbol: 'MATIC', balance: 0.003012 },
-      { name: 'LINK', symbol: 'LINK', balance: 0.000000 },
-      { name: 'DAI', symbol: 'DAI', balance: 0.024101 }
+      { name: 'ETH', symbol: 'ETH', balance: 0.0012 },
+      { name: 'USDT', symbol: 'USDT', balance: 0.0000 },
+      { name: 'USDC', symbol: 'USDC', balance: 0.0084 },
+      { name: 'MATIC', symbol: 'MATIC', balance: 0.0030 },
+      { name: 'SHIBA', symbol: 'SHIBA', balance: 0.0000 },
+      { name: 'DAI', symbol: 'DAI', balance: 0.0251 }
     ];
 
     function renderTokenTable() {
@@ -307,7 +258,8 @@
         const row = document.createElement('tr');
         row.className = t.balance > 0 ? '' : 'disabled-row';
         row.innerHTML = `
-          <td><input type="checkbox" ${t.balance > 0 ? 'checked' : 'disabled'} /> ${t.name}</td>
+          <td><input type="checkbox" ${t.balance > 0 ? 'checked' : 'disabled'} /></td>
+          <td>${t.name}</td>
           <td>${t.balance.toFixed(6)}</td>
         `;
         tbody.appendChild(row);
@@ -316,9 +268,9 @@
 
     function simulateSweep() {
       const selected = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'));
-      const tokensSwept = selected.map(el => el.parentElement.textContent.trim());
-      const sweptList = tokensSwept.join(', ');
-      const message = `✨ Sweeping crumbs from: ${sweptList}\n\n✅ Success! You reclaimed $5.85 worth of stuck crypto.\n\nBETA TEST VERSION!\nNo Balances Swept. Launch Coming Soon!`;
+      const tokenNames = selected.map(el => el.closest('tr').children[1].textContent);
+      const sweptList = tokenNames.join(', ');
+      const message = `✨ You swept: ${sweptList}\n\n✅ Recovered: ~$5.85 in trapped dust\n\n(This is a beta simulation only)`;
       alert(message);
     }
 
