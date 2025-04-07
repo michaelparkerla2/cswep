@@ -134,7 +134,8 @@
     .mission-text {
       color: #aaa;
       font-size: 0.95rem;
-      margin-top: 30px;
+      margin-top: 20px;
+      margin-bottom: 100px;
     }
     .dropdown-section {
       margin: 50px;
@@ -160,6 +161,58 @@
     }
     .social-footer img:hover {
       filter: brightness(1.5);
+    }
+
+    /* 👇 MOBILE OPTIMIZATION 👇 */
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+      }
+      .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        padding-top: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .sidebar a {
+        flex: 1 1 45%;
+        text-align: center;
+        padding: 10px;
+      }
+      .main-content {
+        margin-left: 0;
+        width: 100%;
+      }
+      .top-banner {
+        left: 0;
+        width: 100%;
+        font-size: 2rem;
+        padding: 12px;
+      }
+      .floating-wallet {
+        top: 70px;
+        right: 20px;
+      }
+      .hero {
+        margin-top: 140px;
+        height: auto;
+      }
+      .scrollable-table {
+        max-height: 200px;
+      }
+      .social-footer {
+        left: 0;
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 15px;
+      }
+      .social-footer img {
+        width: 24px;
+      }
     }
   </style>
 </head>
@@ -203,19 +256,10 @@
         </div>
         <button class="sweep-btn" onclick="simulateSweep()">Sweep My Crumbs</button>
       </div>
-      <style>
-  .mission-text {
-    color: #aaa;
-    font-size: 0.95rem;
-    margin-top: 20px;
-    margin-bottom: 100px; /* 👈 Extra bottom spacing */
-  }
-</style>
-
-<p class="mission-text">
-  We use special technology to magically deliver users a cash-out experience — converting trapped micro balances into CSWEP tokens or stablecoins, no gas required.
-</p>
-</main>
+      <p class="mission-text">
+        We use special technology to magically deliver users a cash-out experience — converting trapped micro balances into CSWEP tokens or stablecoins, no gas required.
+      </p>
+    </main>
 
     <div class="social-footer">
       <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/twitter.png" alt="X"></a>
