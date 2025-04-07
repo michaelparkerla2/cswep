@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CSWEP - Crypto Dust Sweeper</title>
+  <title>✨ CSWEP – The Magic Crypto Sweeper ✨</title>
   <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <style>
@@ -13,22 +13,23 @@
       color: white;
       font-family: 'Segoe UI', sans-serif;
       display: flex;
-      flex-direction: row;
+      flex-direction: column;
+      align-items: center;
     }
     .sidebar {
+      width: 100%;
+      background: #101010;
+      padding: 10px 0;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
       position: fixed;
       top: 0;
-      left: 0;
-      width: 240px;
-      height: 100vh;
-      background: #101010;
-      padding-top: 80px;
       z-index: 900;
     }
     .sidebar a {
-      display: block;
       color: #ccc;
-      padding: 14px 20px;
+      padding: 10px 20px;
       text-decoration: none;
     }
     .sidebar a:hover {
@@ -36,29 +37,20 @@
       color: white;
     }
     .main-content {
-      margin-left: 240px;
+      margin-top: 60px;
       width: 100%;
+      max-width: 800px;
+      text-align: center;
     }
     .top-banner {
-      text-align: center;
-      padding: 10px;
       font-size: 2.8rem;
       font-weight: 700;
-      color: white;
-      background: #0e0e0e;
-      position: fixed;
-      top: 0;
-      width: calc(100% - 240px);
-      z-index: 999;
-      left: 240px;
+      margin: 20px 0;
     }
     .floating-wallet {
-      position: fixed;
-      top: 20px;
-      right: 30px;
-      z-index: 1001;
+      margin-bottom: 20px;
     }
-    .wallet-btn, .wallet-option, .hero button, .sweep-btn {
+    .wallet-btn, .sweep-btn {
       background: #0a65ff;
       color: white;
       border: none;
@@ -67,18 +59,11 @@
       font-weight: bold;
       cursor: pointer;
     }
-    .wallet-btn:hover, .wallet-option:hover, .hero button:hover, .sweep-btn:hover {
+    .wallet-btn:hover, .sweep-btn:hover {
       background: #084dc1;
     }
     .hero {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 80vh;
-      text-align: center;
-      padding: 20px 20px 0 20px;
-      margin-top: 0px;
+      margin: 40px 0;
     }
     .hero img {
       max-width: 200px;
@@ -86,7 +71,6 @@
     }
     .hero h1 {
       font-size: 2rem;
-      white-space: pre-line;
     }
     .hero p {
       color: #ccc;
@@ -94,10 +78,7 @@
       margin: 20px 0;
     }
     main {
-      padding: 60px 20px;
-      max-width: 800px;
-      margin: auto;
-      text-align: center;
+      padding: 20px;
     }
     .subtitle {
       color: #ccc;
@@ -139,17 +120,13 @@
       margin-bottom: 100px;
     }
     .social-footer {
-      position: fixed;
-      bottom: 0;
-      left: 240px;
-      width: calc(100% - 240px);
       display: flex;
       justify-content: center;
       gap: 20px;
       padding: 20px;
       background: #0a0a0a;
       border-top: 1px solid #222;
-      z-index: 1000;
+      width: 100%;
     }
     .social-footer img {
       width: 28px;
@@ -159,49 +136,21 @@
     .social-footer img:hover {
       filter: brightness(1.5);
     }
-
     @media (max-width: 768px) {
-      body {
-        flex-direction: column;
-      }
       .sidebar {
-        position: relative;
-        width: 100%;
-        height: auto;
-        padding-top: 10px;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
+        flex-direction: column;
+        align-items: center;
       }
       .sidebar a {
-        flex: 1 1 45%;
-        text-align: center;
         padding: 10px;
       }
-      .main-content {
-        margin-left: 0;
-        width: 100%;
-      }
       .top-banner {
-        left: 0;
-        width: 100%;
         font-size: 2rem;
-        padding: 12px;
-      }
-      .floating-wallet {
-        top: 70px;
-        right: 20px;
-      }
-      .hero {
-        margin-top: 140px;
-        height: auto;
       }
       .scrollable-table {
         max-height: 200px;
       }
       .social-footer {
-        left: 0;
-        width: 100%;
         flex-wrap: wrap;
         gap: 10px;
         padding: 15px;
@@ -214,30 +163,28 @@
 </head>
 <body>
   <div class="sidebar">
-    <a href="#">🧹 Sweep Tool</a>
+    <a href="#">🩹 Sweep Tool</a>
     <a href="#">📈 Token Dashboard</a>
     <a href="#">💰 Buy CSWEP</a>
-    <a href="#">🗂️ Whitepaper</a>
+    <a href="#">📂 Whitepaper</a>
     <a href="#">🧠 FAQ</a>
     <a href="#">📦 Airdrops</a>
     <a href="#">🔐 Security</a>
-    <a href="#">🧭 Roadmap</a>
+    <a href="#">🔭 Roadmap</a>
     <a href="#">⚖️ Legal</a>
-    <a href="#" title="Coming Soon...">🧰 Dev Tools</a>
+    <a href="#" title="Coming Soon...">🪰 Dev Tools</a>
   </div>
   <div class="main-content">
-    <div class="top-banner">✨ CSWEP – The Magic Crypto Sweeper</div>
+    <div class="top-banner">✨ CSWEP – The Magic Crypto Sweeper ✨</div>
     <div class="floating-wallet">
       <button class="wallet-btn" onclick="connectWallet()">Connect Wallet</button>
     </div>
-
     <div class="hero">
       <img src="cswep.logo.png" alt="CSWEP Logo">
       <h1>Scans wallets. Finds crumbs.<br>Swaps to cash — like magic.</h1>
       <p>Recover trapped micro balances from any wallet.</p>
       <button onclick="document.getElementById('sweepSection').scrollIntoView({ behavior: 'smooth' });">Start Sweeping</button>
     </div>
-
     <main id="sweepSection">
       <h2>Free stuck crypto. Convert to cash. No gas!</h2>
       <p class="subtitle">Sweep dust tokens into real value. Powered by CSWEP.</p>
@@ -256,7 +203,6 @@
         We use special technology to magically deliver users a cash-out experience — converting trapped micro balances into CSWEP tokens or stablecoins, no gas required.
       </p>
     </main>
-
     <div class="social-footer">
       <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/twitter.png" alt="X"></a>
       <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/facebook.png" alt="Facebook"></a>
@@ -266,7 +212,6 @@
       <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/linkedin.png" alt="LinkedIn"></a>
     </div>
   </div>
-
   <script>
     let provider, signer, userAddress;
 
@@ -278,7 +223,7 @@
           signer = provider.getSigner();
           userAddress = await signer.getAddress();
           alert("Wallet connected: " + userAddress);
-          await getBalances();
+          loadTokenBalances();
         } catch (error) {
           console.error("User rejected the request");
         }
@@ -287,70 +232,42 @@
       }
     }
 
-    async function getBalances() {
-      const tokenAddresses = {
-        ETH: null,
-        USDT: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-        USDC: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606EB48",
-        SHIBA: "0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE",
-        MATIC: "0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0",
-        LINK: "0x514910771af9ca656af840dff83e8264ecf986ca",
-        DAI: "0x6B175474E89094C44Da98b954EedeAC495271d0F"
-      };
+    async function loadTokenBalances() {
+      const tokenTable = document.querySelector('#tokenTable tbody');
+      tokenTable.innerHTML = '';
+      const tokens = [
+        { name: 'ETH (Ethereum)', symbol: 'ETH', address: null },
+        { name: 'USDT', symbol: 'USDT', address: '0xdAC17F958D2ee523a2206206994597C13D831ec7' },
+        { name: 'USDC', symbol: 'USDC', address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48' },
+        { name: 'DAI', symbol: 'DAI', address: '0x6B175474E89094C44Da98b954EedeAC495271d0F' }
+      ];
 
-      const erc20Abi = ["function balanceOf(address) view returns (uint256)", "function decimals() view returns (uint8)"];
-      const balances = [];
-
-      for (const [symbol, address] of Object.entries(tokenAddresses)) {
-        if (symbol === "ETH") {
-          const balance = await provider.getBalance(userAddress);
-          balances.push({ name: "ETH (Ethereum)", symbol: "ETH", balance: parseFloat(ethers.utils.formatEther(balance)) });
+      for (const token of tokens) {
+        let balance;
+        if (!token.address) {
+          balance = await provider.getBalance(userAddress);
+          balance = ethers.utils.formatEther(balance);
         } else {
-          const contract = new ethers.Contract(address, erc20Abi, provider);
-          const [bal, decimals] = await Promise.all([
-            contract.balanceOf(userAddress),
-            contract.decimals()
-          ]);
-          balances.push({ name: symbol, symbol, balance: parseFloat(ethers.utils.formatUnits(bal, decimals)) });
+          const abi = ["function balanceOf(address) view returns (uint)"];
+          const contract = new ethers.Contract(token.address, abi, provider);
+          const rawBalance = await contract.balanceOf(userAddress);
+          balance = ethers.utils.formatUnits(rawBalance, 18);
         }
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${token.name}</td><td>${parseFloat(balance).toFixed(6)}</td>`;
+        tokenTable.appendChild(tr);
       }
-
-      renderTokenTable(balances);
-    }
-
-    function renderTokenTable(tokenList) {
-      const tbody = document.querySelector('#tokenTable tbody');
-      tbody.innerHTML = '';
-      tokenList.forEach(t => {
-        const row = document.createElement('tr');
-        row.className = t.balance > 0 ? '' : 'disabled-row';
-        row.innerHTML = `
-          <td><input type="checkbox" ${t.balance > 0 ? 'checked' : 'disabled'} /> ${t.name}</td>
-          <td>${t.balance.toFixed(6)}</td>
-        `;
-        tbody.appendChild(row);
-      });
     }
 
     function simulateSweep() {
-      const rows = Array.from(document.querySelectorAll('tbody tr'));
-      let total = 0;
-      let sweptTokens = [];
-
-      rows.forEach(row => {
-        const checkbox = row.querySelector('input[type="checkbox"]');
-        const name = row.textContent.trim().split(' ')[1];
-        const balance = parseFloat(row.children[1].textContent);
-        if (checkbox && checkbox.checked && balance > 0) {
-          total += balance;
-          sweptTokens.push(name);
-        }
-      });
-
-      const sweptList = sweptTokens.join(', ');
-      const message = `✨ Sweeping crumbs from: ${sweptList}\n\n✅ Success! You reclaimed $${total.toFixed(2)} worth of stuck crypto.\n\nBETA TEST VERSION!\nNo Balances Swept. Launch Coming Soon!`;
-      alert(message);
+      const tokensSwept = Array.from(document.querySelectorAll('#tokenTable tbody tr')).map(tr => tr.children[0].textContent);
+      const sweptList = tokensSwept.join(', ');
+      alert(`✨ Sweeping crumbs from: ${sweptList}\n\n✅ Success! You reclaimed your stuck crypto.\n\nBETA TEST VERSION!\nNo Balances Swept. Launch Coming Soon!`);
     }
+
+    window.onload = () => {
+      if (window.ethereum) connectWallet();
+    };
   </script>
 </body>
 </html>
