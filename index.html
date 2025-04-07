@@ -3,36 +3,45 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CSWEP – Crypto Dust Sweeper</title>
+  <title>CSWEP – The Magic Crypto Sweeper (BETA)</title>
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <style>
-    body { background: #0e0e0e; color: white; font-family: 'Segoe UI', sans-serif; display: flex; margin:0; padding:0;}
-    .main {margin:auto; padding:20px; max-width:600px; text-align:center;}
-    button { padding:10px 20px; margin:10px; background:#0a65ff; color:white; border:none; border-radius:8px; cursor:pointer; }
+    body { background: #0e0e0e; color: white; font-family: 'Segoe UI', sans-serif; margin:0; padding:0; text-align:center; }
+    .main { padding:20px; max-width:600px; margin:auto; }
+    .logo { max-width:100px; display:block; margin:20px auto 0; }
+    h1 { font-size: 2rem; margin: 10px 0; }
+    h2 { margin-top: 0; font-size: 1.4rem; }
+    button { padding:10px 20px; margin:10px; background:#0a65ff; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold; }
     button:hover {background:#084dc1;}
-    table {width:100%;margin-top:20px;border-collapse:collapse;}
-    th, td {border-bottom:1px solid #333;padding:10px;text-align:left;}
-    th {background:#1e1e1e;color:#0a65ff;}
-    .disabled {opacity:0.6;color:#666;}
+    table { width:100%; margin-top:20px; border-collapse:collapse; background:#111; border-radius:10px; overflow:hidden; }
+    th, td { padding:12px; border-bottom:1px solid #333; text-align:left; }
+    th { background:#1e1e1e; color:#0a65ff; }
+    .disabled-row { color:#666; opacity:0.6; }
+    .footer-msg { color:#aaa; font-size: 0.9rem; margin-top:30px; }
+    input[type="checkbox"] { margin-right:10px; }
   </style>
 </head>
 <body>
   <div class="main">
-    <h1>CSWEP – Crypto Dust Sweeper (BETA)</h1>
-    <button onclick="connectWallet()">Connect Wallet</button>
+    <img src="cswep.logo.png" alt="CSWEP Logo" class="logo">
+    <h1>CSWEP – The Magic Crypto Sweeper (BETA)</h1>
+    <h2>Free stuck crypto. Convert to cash. No gas!</h2>
+    <button onclick="connectWallet()" id="connectBtn">Connect Wallet</button>
     <div id="walletAddress"></div>
+
     <table id="balancesTable">
-      <thead><tr><th>Token</th><th>Balance</th></tr></thead>
+      <thead><tr><th>Token</th><th>Your Balance</th></tr></thead>
       <tbody></tbody>
     </table>
-    <button onclick="simulateSweep()">Sweep Dust (Simulated)</button>
+    <button onclick="simulateSweep()">Sweep My Crumbs</button>
+    <p class="footer-msg">We use special technology to magically deliver users a cash-out experience — converting trapped micro balances into CSWEP tokens or stablecoins, no gas required.</p>
   </div>
 
   <script>
     let provider, signer, userAddress;
 
     const tokens = [
-      { name: 'ETH', symbol: 'ETH', decimals: 18 },
+      { name: 'ETH (Ethereum)', symbol: 'ETH', decimals: 18 },
       { name: 'USDT', symbol: 'USDT', address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', decimals: 6 },
       { name: 'USDC', symbol: 'USDC', address: '0xA0b86991C6218B36c1D19D4a2e9Eb0cE3606eB48', decimals: 6 },
       { name: 'DAI', symbol: 'DAI', address: '0x6B175474E89094C44Da98b954EedeAC495271d0F', decimals: 18 },
@@ -57,34 +66,42 @@
     async function fetchBalances(){
       const tableBody = document.querySelector("#balancesTable tbody");
       tableBody.innerHTML = '';
-      
+
       const ethBal = await provider.getBalance(userAddress);
       const ethBalance = parseFloat(ethers.utils.formatEther(ethBal));
-      if(ethBalance < 0.01) addBalanceRow('ETH', ethBalance);
+      addBalanceRow('ETH (Ethereum)', ethBalance);
 
-      const erc20Abi=["function balanceOf(address) view returns (uint256)"];
+      const erc20Abi = ["function balanceOf(address) view returns (uint256)"];
+
       for(let token of tokens.slice(1)){
-        const contract = new ethers.Contract(token.address,erc20Abi,provider);
+        const contract = new ethers.Contract(token.address, erc20Abi, provider);
         const rawBalance = await contract.balanceOf(userAddress);
-        const balance = parseFloat(ethers.utils.formatUnits(rawBalance,token.decimals));
-        if(balance < 1 && balance > 0) addBalanceRow(token.symbol, balance);
+        const balance = parseFloat(ethers.utils.formatUnits(rawBalance, token.decimals));
+        addBalanceRow(token.name, balance);
       }
     }
 
-    function addBalanceRow(tokenSymbol, balance){
-      const row=document.createElement('tr');
-      row.innerHTML=`<td>${tokenSymbol}</td><td>${balance.toFixed(6)}</td>`;
+    function addBalanceRow(tokenName, balance){
+      const row = document.createElement('tr');
+      const isDust = balance > 0 && balance < 1;
+      row.className = balance === 0 ? 'disabled-row' : '';
+      row.innerHTML = `
+        <td><input type="checkbox" ${balance > 0 ? 'checked' : 'disabled'}> ${tokenName}</td>
+        <td>${balance.toFixed(6)}</td>
+      `;
       document.querySelector("#balancesTable tbody").appendChild(row);
     }
 
     function simulateSweep(){
-      const rows=document.querySelectorAll("#balancesTable tbody tr");
-      if(rows.length===0){ alert("No dust detected to sweep!"); return; }
+      const selected = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'));
+      if(selected.length === 0){
+        alert("No dust detected to sweep!");
+        return;
+      }
 
-      let sweptTokens=[];
-      rows.forEach(row=>sweptTokens.push(row.cells[0].textContent));
-
-      alert(`✨ Sweeping dust from: ${sweptTokens.join(", ")}.\n\n✅ Success!\n\nBETA MODE: No real balances moved yet. Thank you for testing CSWEP!`);
+      const tokensSwept = selected.map(el => el.parentElement.textContent.trim());
+      const message = `✨ Sweeping crumbs from: ${tokensSwept.join(", ")}\n\n✅ Success! You reclaimed $5.85 worth of stuck crypto.\n\nBETA TEST VERSION!\nNo Balances Swept. Launch Coming Soon!`;
+      alert(message);
     }
   </script>
 </body>
