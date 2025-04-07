@@ -7,7 +7,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <style>
-    /* Complete original CSS provided earlier */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       background: #0e0e0e;
@@ -138,6 +137,10 @@
       margin-top: 20px;
       margin-bottom: 100px;
     }
+    .dropdown-section {
+      margin: 50px;
+      text-align: center;
+    }
     .social-footer {
       position: fixed;
       bottom: 0;
@@ -159,47 +162,167 @@
     .social-footer img:hover {
       filter: brightness(1.5);
     }
+
+    /* 👇 MOBILE OPTIMIZATION 👇 */
     @media (max-width: 768px) {
-      body { flex-direction: column; }
-      .sidebar { position: relative; width: 100%; height: auto; padding-top: 10px; display: flex; flex-wrap: wrap; justify-content: center; }
-      .sidebar a { flex: 1 1 45%; text-align: center; padding: 10px; }
-      .main-content { margin-left: 0; width: 100%; }
-      .top-banner { left: 0; width: 100%; font-size: 2rem; padding: 12px; }
-      .floating-wallet { top: 70px; right: 20px; }
-      .hero { margin-top: 140px; height: auto; }
-      .scrollable-table { max-height: 200px; }
-      .social-footer { left: 0; width: 100%; flex-wrap: wrap; gap: 10px; padding: 15px; }
-      .social-footer img { width: 24px; }
+      body {
+        flex-direction: column;
+      }
+      .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        padding-top: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .sidebar a {
+        flex: 1 1 45%;
+        text-align: center;
+        padding: 10px;
+      }
+      .main-content {
+        margin-left: 0;
+        width: 100%;
+      }
+      .top-banner {
+        left: 0;
+        width: 100%;
+        font-size: 2rem;
+        padding: 12px;
+      }
+      .floating-wallet {
+        top: 70px;
+        right: 20px;
+      }
+      .hero {
+        margin-top: 140px;
+        height: auto;
+      }
+      .scrollable-table {
+        max-height: 200px;
+      }
+      .social-footer {
+        left: 0;
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 15px;
+      }
+      .social-footer img {
+        width: 24px;
+      }
     }
   </style>
 </head>
 <body>
-  <!-- Entire original HTML structure -->
   <div class="sidebar">
-    <a href="#">🧹 Sweep Tool</a><a href="#">📈 Token Dashboard</a><a href="#">💰 Buy CSWEP</a><a href="#">🗂️ Whitepaper</a><a href="#">🧠 FAQ</a><a href="#">📦 Airdrops</a><a href="#">🔐 Security</a><a href="#">🧭 Roadmap</a><a href="#">⚖️ Legal</a><a href="#" title="Coming Soon...">🧰 Dev Tools</a>
+    <a href="#">🧹 Sweep Tool</a>
+    <a href="#">📈 Token Dashboard</a>
+    <a href="#">💰 Buy CSWEP</a>
+    <a href="#">🗂️ Whitepaper</a>
+    <a href="#">🧠 FAQ</a>
+    <a href="#">📦 Airdrops</a>
+    <a href="#">🔐 Security</a>
+    <a href="#">🧭 Roadmap</a>
+    <a href="#">⚖️ Legal</a>
+    <a href="#" title="Coming Soon...">🧰 Dev Tools</a>
   </div>
   <div class="main-content">
     <div class="top-banner">CSWEP – The Magic Crypto Sweeper</div>
-    <div class="floating-wallet"><button class="wallet-btn" onclick="connectWallet()">Connect Wallet</button></div>
+    <div class="floating-wallet">
+      <button class="wallet-btn" onclick="connectWallet()">Connect Wallet</button>
+    </div>
+
     <div class="hero">
       <img src="cswep.logo.png" alt="CSWEP Logo">
       <h1>Scans wallets. Finds crumbs.<br>Swaps to cash — like magic.</h1>
       <p>Recover trapped micro balances from any wallet.</p>
       <button onclick="document.getElementById('sweepSection').scrollIntoView({ behavior: 'smooth' });">Start Sweeping</button>
     </div>
+
     <main id="sweepSection">
       <h2>Free stuck crypto. Convert to cash. No gas!</h2>
       <p class="subtitle">Sweep dust tokens into real value. Powered by CSWEP.</p>
       <div class="card">
-        <div class="scrollable-table"><table id="tokenTable"><thead><tr><th>Token</th><th>Your Balance</th></tr></thead><tbody></tbody></table></div>
+        <div class="scrollable-table">
+          <table id="tokenTable">
+            <thead>
+              <tr><th>Token</th><th>Your Balance</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
         <button class="sweep-btn" onclick="simulateSweep()">Sweep My Crumbs</button>
       </div>
-      <p class="mission-text">We use special technology to magically deliver users a cash-out experience — converting trapped micro balances into CSWEP tokens or stablecoins, no gas required.</p>
+      <p class="mission-text">
+        We use special technology to magically deliver users a cash-out experience — converting trapped micro balances into CSWEP tokens or stablecoins, no gas required.
+      </p>
     </main>
+
+    <div class="social-footer">
+      <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/twitter.png" alt="X"></a>
+      <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/facebook.png" alt="Facebook"></a>
+      <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/telegram-app.png" alt="Telegram"></a>
+      <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/youtube-play.png" alt="YouTube"></a>
+      <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/instagram-new.png" alt="Instagram"></a>
+      <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/linkedin.png" alt="LinkedIn"></a>
+    </div>
   </div>
-  <!-- Include your original JavaScript exactly as provided here -->
+
   <script>
-    // [The complete original JavaScript you provided earlier inserted exactly here]
+    let provider, signer, userAddress;
+
+    async function connectWallet() {
+      if (window.ethereum) {
+        try {
+          provider = new ethers.providers.Web3Provider(window.ethereum);
+          await provider.send("eth_requestAccounts", []);
+          signer = provider.getSigner();
+          userAddress = await signer.getAddress();
+          alert("Wallet connected: " + userAddress);
+        } catch (error) {
+          console.error("User rejected the request");
+        }
+      } else {
+        alert("MetaMask is not installed. Please install it to use this feature.");
+      }
+    }
+
+    const tokens = [
+      { name: 'ETH (Ethereum)', symbol: 'ETH', balance: 0.001231 },
+      { name: 'USDT', symbol: 'USDT', balance: 0.000000 },
+      { name: 'USDC', symbol: 'USDC', balance: 0.008452 },
+      { name: 'SHIBA', symbol: 'SHIBA', balance: 0.000000 },
+      { name: 'MATIC', symbol: 'MATIC', balance: 0.003012 },
+      { name: 'LINK', symbol: 'LINK', balance: 0.000000 },
+      { name: 'DAI', symbol: 'DAI', balance: 0.024101 }
+    ];
+
+    function renderTokenTable() {
+      const tbody = document.querySelector('#tokenTable tbody');
+      tbody.innerHTML = '';
+      tokens.forEach(t => {
+        const row = document.createElement('tr');
+        row.className = t.balance > 0 ? '' : 'disabled-row';
+        row.innerHTML = `
+          <td><input type="checkbox" ${t.balance > 0 ? 'checked' : 'disabled'} /> ${t.name}</td>
+          <td>${t.balance.toFixed(6)}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function simulateSweep() {
+      const selected = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'));
+      const tokensSwept = selected.map(el => el.parentElement.textContent.trim());
+      const sweptList = tokensSwept.join(', ');
+      const message = `✨ Sweeping crumbs from: ${sweptList}\n\n✅ Success! You reclaimed $5.85 worth of stuck crypto.\n\nBETA TEST VERSION!\nNo Balances Swept. Launch Coming Soon!`;
+      alert(message);
+    }
+
+    window.onload = renderTokenTable;
   </script>
 </body>
 </html>
