@@ -14,22 +14,21 @@
       font-family: 'Segoe UI', sans-serif;
       display: flex;
       flex-direction: column;
-      align-items: center;
     }
     .sidebar {
-      width: 100%;
-      background: #101010;
-      padding: 10px 0;
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
       position: fixed;
       top: 0;
+      left: 0;
+      width: 240px;
+      height: 100vh;
+      background: #101010;
+      padding-top: 80px;
       z-index: 900;
     }
     .sidebar a {
+      display: block;
       color: #ccc;
-      padding: 10px 20px;
+      padding: 14px 20px;
       text-decoration: none;
     }
     .sidebar a:hover {
@@ -37,20 +36,29 @@
       color: white;
     }
     .main-content {
-      margin-top: 60px;
-      width: 100%;
-      max-width: 800px;
-      text-align: center;
+      margin-left: 240px;
+      width: calc(100% - 240px);
     }
     .top-banner {
+      text-align: center;
+      padding: 10px;
       font-size: 2.8rem;
       font-weight: 700;
-      margin: 20px 0;
+      color: white;
+      background: #0e0e0e;
+      position: fixed;
+      top: 0;
+      width: calc(100% - 240px);
+      z-index: 999;
+      left: 240px;
     }
     .floating-wallet {
-      margin-bottom: 20px;
+      position: fixed;
+      top: 20px;
+      right: 30px;
+      z-index: 1001;
     }
-    .wallet-btn, .sweep-btn {
+    .wallet-btn, .wallet-option, .hero button, .sweep-btn {
       background: #0a65ff;
       color: white;
       border: none;
@@ -59,11 +67,18 @@
       font-weight: bold;
       cursor: pointer;
     }
-    .wallet-btn:hover, .sweep-btn:hover {
+    .wallet-btn:hover, .wallet-option:hover, .hero button:hover, .sweep-btn:hover {
       background: #084dc1;
     }
     .hero {
-      margin: 40px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 80vh;
+      text-align: center;
+      padding: 20px 20px 0 20px;
+      margin-top: 0px;
     }
     .hero img {
       max-width: 200px;
@@ -71,6 +86,7 @@
     }
     .hero h1 {
       font-size: 2rem;
+      white-space: pre-line;
     }
     .hero p {
       color: #ccc;
@@ -78,7 +94,10 @@
       margin: 20px 0;
     }
     main {
-      padding: 20px;
+      padding: 60px 20px;
+      max-width: 800px;
+      margin: auto;
+      text-align: center;
     }
     .subtitle {
       color: #ccc;
@@ -120,13 +139,17 @@
       margin-bottom: 100px;
     }
     .social-footer {
+      position: fixed;
+      bottom: 0;
+      left: 240px;
+      width: calc(100% - 240px);
       display: flex;
       justify-content: center;
       gap: 20px;
       padding: 20px;
       background: #0a0a0a;
       border-top: 1px solid #222;
-      width: 100%;
+      z-index: 1000;
     }
     .social-footer img {
       width: 28px;
@@ -138,14 +161,34 @@
     }
     @media (max-width: 768px) {
       .sidebar {
-        flex-direction: column;
-        align-items: center;
+        position: relative;
+        width: 100%;
+        height: auto;
+        padding-top: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
       }
       .sidebar a {
+        flex: 1 1 45%;
+        text-align: center;
         padding: 10px;
+      }
+      .main-content, .top-banner, .social-footer {
+        left: 0;
+        width: 100%;
       }
       .top-banner {
         font-size: 2rem;
+        padding: 12px;
+      }
+      .floating-wallet {
+        top: 70px;
+        right: 20px;
+      }
+      .hero {
+        margin-top: 140px;
+        height: auto;
       }
       .scrollable-table {
         max-height: 200px;
@@ -163,16 +206,16 @@
 </head>
 <body>
   <div class="sidebar">
-    <a href="#">🩹 Sweep Tool</a>
+    <a href="#">🧹 Sweep Tool</a>
     <a href="#">📈 Token Dashboard</a>
     <a href="#">💰 Buy CSWEP</a>
-    <a href="#">📂 Whitepaper</a>
+    <a href="#">🗂️ Whitepaper</a>
     <a href="#">🧠 FAQ</a>
     <a href="#">📦 Airdrops</a>
     <a href="#">🔐 Security</a>
-    <a href="#">🔭 Roadmap</a>
+    <a href="#">🧭 Roadmap</a>
     <a href="#">⚖️ Legal</a>
-    <a href="#" title="Coming Soon...">🪰 Dev Tools</a>
+    <a href="#" title="Coming Soon...">🧰 Dev Tools</a>
   </div>
   <div class="main-content">
     <div class="top-banner">✨ CSWEP – The Magic Crypto Sweeper ✨</div>
@@ -217,52 +260,56 @@
 
     async function connectWallet() {
       if (window.ethereum) {
-        try {
-          provider = new ethers.providers.Web3Provider(window.ethereum);
-          await provider.send("eth_requestAccounts", []);
-          signer = provider.getSigner();
-          userAddress = await signer.getAddress();
-          alert("Wallet connected: " + userAddress);
-          loadTokenBalances();
-        } catch (error) {
-          console.error("User rejected the request");
-        }
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        signer = provider.getSigner();
+        userAddress = await signer.getAddress();
+        alert("Wallet connected: " + userAddress);
+        fetchTokenBalances();
       } else {
-        alert("MetaMask is not installed. Please install it to use this feature.");
+        alert("MetaMask not found. Please install it.");
       }
     }
 
-    async function loadTokenBalances() {
-      const tokenTable = document.querySelector('#tokenTable tbody');
-      tokenTable.innerHTML = '';
-      const tokens = [
+    async function fetchTokenBalances() {
+      const tokenList = [
         { name: 'ETH (Ethereum)', symbol: 'ETH', address: null },
-        { name: 'USDT', symbol: 'USDT', address: '0xdAC17F958D2ee523a2206206994597C13D831ec7' },
         { name: 'USDC', symbol: 'USDC', address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48' },
-        { name: 'DAI', symbol: 'DAI', address: '0x6B175474E89094C44Da98b954EedeAC495271d0F' }
+        { name: 'USDT', symbol: 'USDT', address: '0xdAC17F958D2ee523a2206206994597C13D831ec7' },
+        { name: 'DAI', symbol: 'DAI', address: '0x6B175474E89094C44Da98b954EedeAC495271d0F' },
+        { name: 'MATIC', symbol: 'MATIC', address: '0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0' },
+        { name: 'CRV', symbol: 'CRV', address: '0xD533a949740bb3306d119CC777fa900bA034cd52' }
       ];
 
-      for (const token of tokens) {
-        let balance;
+      const decimals = 18;
+      const ERC20_ABI = ["function balanceOf(address) view returns (uint)", "function decimals() view returns (uint8)"];
+      const tbody = document.querySelector('#tokenTable tbody');
+      tbody.innerHTML = '';
+
+      for (const token of tokenList) {
+        let balance = 0;
         if (!token.address) {
           balance = await provider.getBalance(userAddress);
           balance = ethers.utils.formatEther(balance);
         } else {
-          const abi = ["function balanceOf(address) view returns (uint)"];
-          const contract = new ethers.Contract(token.address, abi, provider);
-          const rawBalance = await contract.balanceOf(userAddress);
-          balance = ethers.utils.formatUnits(rawBalance, 18);
+          const contract = new ethers.Contract(token.address, ERC20_ABI, provider);
+          balance = await contract.balanceOf(userAddress);
+          const tokenDecimals = await contract.decimals();
+          balance = ethers.utils.formatUnits(balance, tokenDecimals);
         }
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${token.name}</td><td>${parseFloat(balance).toFixed(6)}</td>`;
-        tokenTable.appendChild(tr);
+        const row = document.createElement('tr');
+        row.className = parseFloat(balance) > 0 ? '' : 'disabled-row';
+        row.innerHTML = `<td><input type="checkbox" ${parseFloat(balance) > 0 ? 'checked' : 'disabled'} /> ${token.name}</td><td>${parseFloat(balance).toFixed(6)}</td>`;
+        tbody.appendChild(row);
       }
     }
 
     function simulateSweep() {
-      const tokensSwept = Array.from(document.querySelectorAll('#tokenTable tbody tr')).map(tr => tr.children[0].textContent);
+      const selected = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'));
+      const tokensSwept = selected.map(el => el.parentElement.textContent.trim());
       const sweptList = tokensSwept.join(', ');
-      alert(`✨ Sweeping crumbs from: ${sweptList}\n\n✅ Success! You reclaimed your stuck crypto.\n\nBETA TEST VERSION!\nNo Balances Swept. Launch Coming Soon!`);
+      const message = `✨ Sweeping crumbs from: ${sweptList}\n\n✅ Success! You reclaimed $5.85 worth of stuck crypto.\n\nBETA TEST VERSION!\nNo Balances Swept. Launch Coming Soon!`;
+      alert(message);
     }
 
     window.onload = () => {
