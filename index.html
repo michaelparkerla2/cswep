@@ -14,7 +14,13 @@
     h2 { margin: 10px 0 20px 0; font-size: 1.2rem; }
     button { padding:10px 20px; margin:10px; background:#0a65ff; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold; }
     button:hover {background:#084dc1;}
-    .button-group { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+    .button-row { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+    .banner { background: #1e1e1e; color: #0a65ff; padding: 10px; margin: 10px 0; border-radius: 10px; font-weight: bold; animation: pulse 2s infinite; }
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.6; }
+      100% { opacity: 1; }
+    }
     table { width:100%; margin-top:20px; border-collapse:collapse; background:#111; border-radius:10px; overflow:hidden; }
     th, td { padding:12px; border-bottom:1px solid #333; text-align:left; }
     th { background:#1e1e1e; color:#0a65ff; }
@@ -28,12 +34,12 @@
     <h1><i>CSWEP</i> (BETA)<span class="subtitle">The Magic✨ Crypto Sweeper</span></h1>
     <h2>Free stuck crypto. Convert to cash. No gas!</h2>
     <img src="cswep.logo.png" alt="CSWEP Logo" class="logo">
-    <div class="button-group">
+    <div class="button-row">
       <button onclick="connectWallet()" id="connectBtn">Connect Wallet</button>
       <button onclick="simulateSweep()">Sweep My Crumbs</button>
     </div>
+    <div class="banner">🔒 Powered by 2 Patent-Pending Web3 Technologies</div>
     <div id="walletAddress"></div>
-
     <table id="balancesTable">
       <thead><tr><th>Token</th><th>Your Balance</th></tr></thead>
       <tbody></tbody>
