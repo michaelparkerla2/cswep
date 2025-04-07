@@ -76,7 +76,7 @@
       justify-content: center;
       height: 80vh;
       text-align: center;
-      padding: 20px 20px 0 20px;
+      padding: 20px;
       margin-top: 0px;
     }
     .hero img {
@@ -162,8 +162,6 @@
     .social-footer img:hover {
       filter: brightness(1.5);
     }
-
-    /* 👇 MOBILE OPTIMIZATION 👇 */
     @media (max-width: 768px) {
       body {
         flex-direction: column;
@@ -273,6 +271,7 @@
 
   <script>
     let provider, signer, userAddress;
+    let balances = [];
 
     async function connectWallet() {
       if (window.ethereum) {
@@ -281,7 +280,7 @@
           await provider.send("eth_requestAccounts", []);
           signer = provider.getSigner();
           userAddress = await signer.getAddress();
-          alert("Wallet connected: " + userAddress);
+          fetchBalances(userAddress);
         } catch (error) {
           console.error("User rejected the request");
         }
@@ -290,20 +289,34 @@
       }
     }
 
-    const tokens = [
-      { name: 'ETH (Ethereum)', symbol: 'ETH', balance: 0.001231 },
-      { name: 'USDT', symbol: 'USDT', balance: 0.000000 },
-      { name: 'USDC', symbol: 'USDC', balance: 0.008452 },
-      { name: 'SHIBA', symbol: 'SHIBA', balance: 0.000000 },
-      { name: 'MATIC', symbol: 'MATIC', balance: 0.003012 },
-      { name: 'LINK', symbol: 'LINK', balance: 0.000000 },
-      { name: 'DAI', symbol: 'DAI', balance: 0.024101 }
-    ];
+    async function fetchBalances(address) {
+      const tokenList = [
+        { symbol: 'ETH', address: null, decimals: 18 },
+        { symbol: 'USDT', address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', decimals: 6 },
+        { symbol: 'USDC', address: '0xA0b86991C6218B36c1D19D4a2e9Eb0cE3606eB48', decimals: 6 },
+        { symbol: 'DAI', address: '0x6B175474E89094C44Da98b954EedeAC495271d0F', decimals: 18 },
+        { symbol: 'MATIC', address: '0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0', decimals: 18 }
+      ];
+
+      const erc20ABI = ["function balanceOf(address) view returns (uint256)"];
+      balances = [];
+
+      const ethBalance = await provider.getBalance(address);
+      balances.push({ name: 'ETH (Ethereum)', balance: parseFloat(ethers.utils.formatEther(ethBalance)) });
+
+      for (let token of tokenList.slice(1)) {
+        const contract = new ethers.Contract(token.address, erc20ABI, provider);
+        const raw = await contract.balanceOf(address);
+        balances.push({ name: token.symbol, balance: parseFloat(ethers.utils.formatUnits(raw, token.decimals)) });
+      }
+
+      renderTokenTable();
+    }
 
     function renderTokenTable() {
       const tbody = document.querySelector('#tokenTable tbody');
       tbody.innerHTML = '';
-      tokens.forEach(t => {
+      balances.forEach(t => {
         const row = document.createElement('tr');
         row.className = t.balance > 0 ? '' : 'disabled-row';
         row.innerHTML = `
@@ -318,11 +331,17 @@
       const selected = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'));
       const tokensSwept = selected.map(el => el.parentElement.textContent.trim());
       const sweptList = tokensSwept.join(', ');
-      const message = `✨ Sweeping crumbs from: ${sweptList}\n\n✅ Success! You reclaimed $5.85 worth of stuck crypto.\n\nBETA TEST VERSION!\nNo Balances Swept. Launch Coming Soon!`;
+      const total = balances.filter(b => tokensSwept.includes(b.name)).reduce((acc, b) => acc + b.balance, 0);
+      const message = `✨ Sweeping crumbs from: ${sweptList}
+
+✅ Success! You reclaimed ~$${total.toFixed(2)} worth of stuck crypto.
+
+BETA TEST VERSION!
+No Balances Swept. Launch Coming Soon!`;
       alert(message);
     }
 
-    window.onload = renderTokenTable;
+    window.onload = () => console.log("Ready");
   </script>
 </body>
 </html>
