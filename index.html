@@ -8,9 +8,9 @@
   <style>
     body { background: #0e0e0e; color: white; font-family: 'Segoe UI', sans-serif; margin:0; padding:0; text-align:center; }
     .main { padding:20px; max-width:600px; margin:auto; }
-    .logo { max-width:100px; display:block; margin:10px auto 10px; }
-    h1 { font-size: 2rem; margin: 10px 0 5px 0; }
-    h2 { margin: 5px 0 20px 0; font-size: 1.2rem; }
+    .logo { max-width:100px; display:block; margin:10px auto 20px; }
+    h1 { font-size: 2rem; margin: 20px 0 10px 0; }
+    h2 { margin: 0 0 20px 0; font-size: 1.2rem; }
     button { padding:10px 20px; margin:10px; background:#0a65ff; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold; }
     button:hover {background:#084dc1;}
     table { width:100%; margin-top:20px; border-collapse:collapse; background:#111; border-radius:10px; overflow:hidden; }
@@ -85,15 +85,19 @@
 
       const ethBal = await provider.getBalance(userAddress);
       const ethBalance = parseFloat(ethers.utils.formatEther(ethBal));
-      addBalanceRow('ETH (Ethereum)', ethBalance);
+      if (ethBalance > 0 || ethBalance === 0) addBalanceRow('ETH (Ethereum)', ethBalance);
 
       const erc20Abi = ["function balanceOf(address) view returns (uint256)"];
 
       for(let token of tokens.slice(1)){
-        const contract = new ethers.Contract(token.address, erc20Abi, provider);
-        const rawBalance = await contract.balanceOf(userAddress);
-        const balance = parseFloat(ethers.utils.formatUnits(rawBalance, token.decimals));
-        addBalanceRow(token.name, balance);
+        try {
+          const contract = new ethers.Contract(token.address, erc20Abi, provider);
+          const rawBalance = await contract.balanceOf(userAddress);
+          const balance = parseFloat(ethers.utils.formatUnits(rawBalance, token.decimals));
+          if (balance > 0 || balance === 0) addBalanceRow(token.name, balance);
+        } catch (err) {
+          console.error(`Error fetching ${token.symbol}:`, err);
+        }
       }
     }
 
@@ -115,7 +119,9 @@
       }
 
       const tokensSwept = selected.map(el => el.parentElement.textContent.trim());
-      const message = `✨ Sweeping crumbs from: ${tokensSwept.join(", ")}\n\n✅ Success! You reclaimed $5.85 worth of stuck crypto.\n\nBETA TEST VERSION!\nNo Balances Swept. Launch Coming Soon!`;
+      const message = `✨ Sweeping crumbs from: ${tokensSwept.join(", ")}
+\n\n✅ Success! You reclaimed $5.85 worth of stuck crypto.
+\n\nBETA TEST VERSION!\nNo Balances Swept. Launch Coming Soon!`;
       alert(message);
     }
   </script>
