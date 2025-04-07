@@ -6,7 +6,6 @@
   <title>CSWEP - Crypto Dust Sweeper</title>
   <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@thirdweb-dev/sdk@latest/dist/thirdweb.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -14,7 +13,6 @@
       color: white;
       font-family: 'Segoe UI', sans-serif;
       display: flex;
-      flex-direction: column;
     }
     .sidebar {
       position: fixed;
@@ -38,7 +36,7 @@
     }
     .main-content {
       margin-left: 240px;
-      width: calc(100% - 240px);
+      width: 100%;
     }
     .top-banner {
       text-align: center;
@@ -59,7 +57,7 @@
       right: 30px;
       z-index: 1001;
     }
-    .wallet-btn, .sweep-btn {
+    .wallet-btn, .wallet-option, .hero button, .sweep-btn {
       background: #0a65ff;
       color: white;
       border: none;
@@ -68,7 +66,7 @@
       font-weight: bold;
       cursor: pointer;
     }
-    .wallet-btn:hover, .sweep-btn:hover {
+    .wallet-btn:hover, .wallet-option:hover, .hero button:hover, .sweep-btn:hover {
       background: #084dc1;
     }
     .hero {
@@ -78,7 +76,7 @@
       justify-content: center;
       height: 80vh;
       text-align: center;
-      padding: 20px;
+      padding: 20px 20px 0 20px;
       margin-top: 0px;
     }
     .hero img {
@@ -139,6 +137,10 @@
       margin-top: 20px;
       margin-bottom: 100px;
     }
+    .dropdown-section {
+      margin: 50px;
+      text-align: center;
+    }
     .social-footer {
       position: fixed;
       bottom: 0;
@@ -160,6 +162,8 @@
     .social-footer img:hover {
       filter: brightness(1.5);
     }
+
+    /* 👇 MOBILE OPTIMIZATION 👇 */
     @media (max-width: 768px) {
       body {
         flex-direction: column;
@@ -178,11 +182,13 @@
         text-align: center;
         padding: 10px;
       }
-      .main-content, .top-banner {
+      .main-content {
         margin-left: 0;
         width: 100%;
       }
       .top-banner {
+        left: 0;
+        width: 100%;
         font-size: 2rem;
         padding: 12px;
       }
@@ -221,12 +227,12 @@
     <a href="#">🔐 Security</a>
     <a href="#">🧭 Roadmap</a>
     <a href="#">⚖️ Legal</a>
-    <a href="#">🧰 Dev Tools</a>
+    <a href="#" title="Coming Soon...">🧰 Dev Tools</a>
   </div>
   <div class="main-content">
     <div class="top-banner">CSWEP – The Magic Crypto Sweeper</div>
     <div class="floating-wallet">
-      <div id="connect-wallet"></div>
+      <button class="wallet-btn" onclick="connectWallet()">Connect Wallet</button>
     </div>
 
     <div class="hero">
@@ -266,20 +272,57 @@
   </div>
 
   <script>
-    const sdk = new thirdweb.ThirdwebSDK("ethereum");
-    const connectWallet = new thirdweb.ConnectWallet(sdk, {
-      theme: "dark",
-      btnClass: "wallet-btn"
-    });
-    document.getElementById("connect-wallet").appendChild(connectWallet.render());
+    let provider, signer, userAddress;
+
+    async function connectWallet() {
+      if (window.ethereum) {
+        try {
+          provider = new ethers.providers.Web3Provider(window.ethereum);
+          await provider.send("eth_requestAccounts", []);
+          signer = provider.getSigner();
+          userAddress = await signer.getAddress();
+          alert("Wallet connected: " + userAddress);
+        } catch (error) {
+          console.error("User rejected the request");
+        }
+      } else {
+        alert("MetaMask is not installed. Please install it to use this feature.");
+      }
+    }
+
+    const tokens = [
+      { name: 'ETH (Ethereum)', symbol: 'ETH', balance: 0.001231 },
+      { name: 'USDT', symbol: 'USDT', balance: 0.000000 },
+      { name: 'USDC', symbol: 'USDC', balance: 0.008452 },
+      { name: 'SHIBA', symbol: 'SHIBA', balance: 0.000000 },
+      { name: 'MATIC', symbol: 'MATIC', balance: 0.003012 },
+      { name: 'LINK', symbol: 'LINK', balance: 0.000000 },
+      { name: 'DAI', symbol: 'DAI', balance: 0.024101 }
+    ];
+
+    function renderTokenTable() {
+      const tbody = document.querySelector('#tokenTable tbody');
+      tbody.innerHTML = '';
+      tokens.forEach(t => {
+        const row = document.createElement('tr');
+        row.className = t.balance > 0 ? '' : 'disabled-row';
+        row.innerHTML = `
+          <td><input type="checkbox" ${t.balance > 0 ? 'checked' : 'disabled'} /> ${t.name}</td>
+          <td>${t.balance.toFixed(6)}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
 
     function simulateSweep() {
       const selected = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'));
       const tokensSwept = selected.map(el => el.parentElement.textContent.trim());
       const sweptList = tokensSwept.join(', ');
-      const message = `\u2728 Sweeping crumbs from: ${sweptList}\n\n\u2705 Success! You reclaimed small balances.\n\nBETA TEST VERSION!\nNo tokens swept.`;
+      const message = `✨ Sweeping crumbs from: ${sweptList}\n\n✅ Success! You reclaimed $5.85 worth of stuck crypto.\n\nBETA TEST VERSION!\nNo Balances Swept. Launch Coming Soon!`;
       alert(message);
     }
+
+    window.onload = renderTokenTable;
   </script>
 </body>
 </html>
