@@ -161,7 +161,7 @@
   <div class="main-content">
     <div class="top-banner">CSWEP – The Magic Crypto Sweeper</div>
     <div class="floating-wallet">
-      <button class="wallet-btn" onclick="showWalletOptions()">Connect Wallet</button>
+      <button class="wallet-btn" onclick="connectWallet()">Connect Wallet</button>
     </div>
 
     <div class="hero">
@@ -201,6 +201,24 @@
   </div>
 
   <script>
+    let provider, signer, userAddress;
+
+    async function connectWallet() {
+      if (window.ethereum) {
+        try {
+          provider = new ethers.providers.Web3Provider(window.ethereum);
+          await provider.send("eth_requestAccounts", []);
+          signer = provider.getSigner();
+          userAddress = await signer.getAddress();
+          alert("Wallet connected: " + userAddress);
+        } catch (error) {
+          console.error("User rejected the request");
+        }
+      } else {
+        alert("MetaMask is not installed. Please install it to use this feature.");
+      }
+    }
+
     const tokens = [
       { name: 'ETH (Ethereum)', symbol: 'ETH', balance: 0.001231 },
       { name: 'USDT', symbol: 'USDT', balance: 0.000000 },
@@ -229,10 +247,6 @@
       const selected = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'));
       const tokensSwept = selected.map(el => el.parentElement.textContent.trim());
       alert(`Sweeping crumbs from: ${tokensSwept.join(', ')}\n\n✅ Success! You reclaimed $5.85 worth of stuck crypto.`);
-    }
-
-    function showWalletOptions() {
-      alert("MetaMask connection logic here");
     }
 
     window.onload = renderTokenTable;
