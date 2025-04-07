@@ -106,7 +106,7 @@
       const row = document.createElement('tr');
       row.className = balance === 0 ? 'disabled-row' : '';
       row.innerHTML = `
-        <td><input type="checkbox" ${balance > 0 ? 'checked' : 'disabled'}> ${tokenName}</td>
+        <td><input type="checkbox" ${balance > 0 ? 'checked' : 'disabled'} data-balance="${balance}"> ${tokenName}</td>
         <td>${balance.toFixed(6)}</td>
       `;
       document.querySelector("#balancesTable tbody").appendChild(row);
@@ -120,9 +120,11 @@
       }
 
       const tokensSwept = selected.map(el => el.parentElement.textContent.trim());
+      const totalAmount = selected.reduce((sum, el) => sum + parseFloat(el.getAttribute('data-balance') || 0), 0);
+      const totalUSD = (totalAmount * 2000).toFixed(2); // estimate conversion
+
       const message = `✨ Sweeping crumbs from: ${tokensSwept.join(", ")}
-\n\n✅ Success! You reclaimed $5.85 worth of stuck crypto.
-\n\nBETA TEST VERSION!\nNo Balances Swept. Launch Coming Soon!`;
+\n\n✅ Success! You reclaimed approximately $${totalUSD} worth of stuck crypto.\n\nBETA TEST VERSION!\nNo Balances Swept. Launch Coming Soon!`;
       alert(message);
     }
   </script>
