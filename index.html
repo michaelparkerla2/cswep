@@ -351,7 +351,7 @@
           signer = provider.getSigner();
           userAddress = await signer.getAddress();
           alert("Wallet connected: " + userAddress);
-          await fetchTokenBalances(userAddress); // Fetch real balances after connection
+          await fetchTokenBalances(userAddress); // Fetch balances only after connection
         } catch (error) {
           console.error("User rejected the request or error occurred:", error);
           alert("Wallet connection failed.");
@@ -402,33 +402,47 @@
         renderTokenTable(balances);
       } catch (error) {
         console.error("Error fetching balances:", error);
-        alert("Failed to fetch token balances. Check console for details.");
+        alert("Failed to fetch token balances. Ensure you're on Ethereum Mainnet and try again.");
       }
     }
 
     function renderTokenTable(tokens) {
       const tbody = document.querySelector('#tokenTable tbody');
       tbody.innerHTML = '';
-      tokens.forEach(t => {
+      if (!tokens || tokens.length === 0) {
         const row = document.createElement('tr');
-        row.className = t.balance > 0 ? '' : 'disabled-row';
-        row.innerHTML = `
-          <td><input type="checkbox" ${t.balance > 0 ? 'checked' : 'disabled'} /> ${t.name}</td>
-          <td>${t.balance.toFixed(6)}</td>
-        `;
+        row.innerHTML = `<td colspan="2" style="text-align: center;">Connect wallet to see balances</td>`;
         tbody.appendChild(row);
-      });
+      } else {
+        tokens.forEach(t => {
+          const row = document.createElement('tr');
+          row.className = t.balance > 0 ? '' : 'disabled-row';
+          row.innerHTML = `
+            <td><input type="checkbox" ${t.balance > 0 ? 'checked' : 'disabled'} /> ${t.name}</td>
+            <td>${t.balance.toFixed(6)}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      }
     }
 
     function simulateSweep() {
       const selected = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'));
+      if (selected.length === 0) {
+        alert("No tokens selected to sweep. Please connect a wallet and select tokens with balances.");
+        return;
+      }
       const tokensSwept = selected.map(el => el.parentElement.textContent.trim());
       const sweptList = tokensSwept.join(', ');
       const message = `✨ Sweeping crumbs from: ${sweptList}\n\n✅ Success! You reclaimed tiny balances from your wallet.\n\nBETA TEST VERSION!\nNo Balances Swept. Launch Coming Soon!`;
       alert(message);
     }
 
-    window.onload = () => console.log("App ready. Connect wallet to see real balances.");
+    // Initialize with a placeholder message on load
+    window.onload = () => {
+      renderTokenTable([]); // Show "Connect wallet" message by default
+      console.log("App ready. Connect wallet to see real balances.");
+    };
   </script>
 </body>
 </html>
