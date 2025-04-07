@@ -6,39 +6,24 @@
   <title>CSWEP - Crypto Dust Sweeper</title>
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <style>
-    /* [CSS remains unchanged for brevity; use the original styling from your file] */
+    body { font-family: Arial, sans-serif; text-align: center; }
+    .wallet-btn, .sweep-btn { padding: 10px 20px; margin: 10px; }
+    table { margin: 20px auto; border-collapse: collapse; }
+    th, td { padding: 8px; border: 1px solid #ddd; }
   </style>
 </head>
 <body>
-  <div class="sidebar">
-    <a href="#">🧹 Sweep Tool</a>
-    <!-- [Other sidebar links remain unchanged] -->
-  </div>
   <div class="main-content">
-    <div class="top-banner">CSWEP – The Magic Crypto Sweeper</div>
-    <div class="floating-wallet">
-      <button class="wallet-btn" onclick="connectWallet()">Connect Wallet</button>
+    <button class="wallet-btn" onclick="connectWallet()">Connect Wallet</button>
+    <div id="tokenTable">
+      <table>
+        <thead>
+          <tr><th>Token</th><th>Your Balance</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
     </div>
-    <div class="hero">
-      <h1>Scans wallets. Finds crumbs.<br>Swaps to cash — like magic.</h1>
-      <p>Recover trapped micro balances from any wallet.</p>
-      <button onclick="document.getElementById('sweepSection').scrollIntoView({ behavior: 'smooth' });">Start Sweeping</button>
-    </div>
-    <main id="sweepSection">
-      <h2>Free stuck crypto. Convert to cash. No gas!</h2>
-      <p class="subtitle">Sweep dust tokens into real value.</p>
-      <div class="card">
-        <div class="scrollable-table">
-          <table id="tokenTable">
-            <thead>
-              <tr><th>Token</th><th>Your Balance</th></tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <button class="sweep-btn" onclick="simulateSweep()">Sweep My Crumbs</button>
-      </div>
-    </main>
+    <button class="sweep-btn" onclick="simulateSweep()">Sweep My Crumbs</button>
   </div>
 
   <script>
@@ -46,108 +31,80 @@
 
     async function connectWallet() {
       if (!window.ethereum) {
-        alert("MetaMask is not installed. Please install it to use this feature.");
+        alert("MetaMask is not installed.");
         return;
       }
       try {
         provider = new ethers.providers.Web3Provider(window.ethereum);
         const network = await provider.getNetwork();
+        console.log("Connected to network:", network);
         if (network.chainId !== 1) {
-          alert("Please switch to Ethereum Mainnet in MetaMask.");
+          alert("Please switch to Ethereum Mainnet.");
           return;
         }
         await provider.send("eth_requestAccounts", []);
         signer = provider.getSigner();
         userAddress = await signer.getAddress();
-        alert("Wallet connected: " + userAddress);
+        console.log("Wallet connected:", userAddress);
         await fetchTokenBalances(userAddress);
       } catch (error) {
         console.error("Connection error:", error);
-        if (error.code === 4001) {
-          alert("User rejected the request.");
-        } else if (error.code === -32002) {
-          alert("Request already pending. Check MetaMask.");
-        } else {
-          alert("Wallet connection failed: " + error.message);
-        }
+        alert("Failed to connect wallet: " + error.message);
       }
     }
 
     async function fetchTokenBalances(address) {
       const tokenList = [
-        { name: 'ETH (Ethereum)', symbol: 'ETH', decimals: 18 },
-        { name: 'USDT', symbol: 'USDT', address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', decimals: 6 },
+        { name: 'ETH', symbol: 'ETH', decimals: 18 },
         { name: 'USDC', symbol: 'USDC', address: '0xA0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', decimals: 6 },
-        { name: 'SHIBA', symbol: 'SHIB', address: '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE', decimals: 18 },
-        { name: 'MATIC', symbol: 'MATIC', address: '0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0', decimals: 18 },
-        { name: 'LINK', symbol: 'LINK', address: '0x514910771AF9Ca656af840dff83E8264EcF986CA', decimals: 18 },
         { name: 'DAI', symbol: 'DAI', address: '0x6B175474E89094C44Da98b954EedeAC495271d0F', decimals: 18 }
       ];
 
-      const erc20Abi = [
-        "function balanceOf(address) view returns (uint256)",
-        "function decimals() view returns (uint8)"
-      ];
-      const balances = [];
+      const erc20Abi = ["function balanceOf(address) view returns (uint256)"];
 
       try {
         console.log("Fetching ETH balance...");
         const ethBalance = await provider.getBalance(address);
-        balances.push({
-          name: 'ETH (Ethereum)',
-          symbol: 'ETH',
-          balance: parseFloat(ethers.utils.formatEther(ethBalance))
-        });
+        const ethFormatted = ethers.utils.formatEther(ethBalance);
+        console.log("ETH balance:", ethFormatted);
+        renderTokenRow('ETH', ethFormatted);
 
         for (let token of tokenList.slice(1)) {
           console.log(`Fetching balance for ${token.name}...`);
           const contract = new ethers.Contract(token.address, erc20Abi, provider);
           const rawBalance = await contract.balanceOf(address);
           const formattedBalance = ethers.utils.formatUnits(rawBalance, token.decimals);
-          balances.push({
-            name: token.name,
-            symbol: token.symbol,
-            balance: parseFloat(formattedBalance)
-          });
+          console.log(`${token.name} balance:`, formattedBalance);
+          renderTokenRow(token.name, formattedBalance);
         }
-
-        renderTokenTable(balances);
       } catch (error) {
         console.error("Fetch error:", error);
-        alert("Failed to fetch token balances. Ensure you're on Ethereum Mainnet and try again.");
+        alert("Failed to fetch balances: " + error.message);
       }
     }
 
-    function renderTokenTable(tokens) {
+    function renderTokenRow(name, balance) {
       const tbody = document.querySelector('#tokenTable tbody');
-      tbody.innerHTML = '';
-      if (!tokens || tokens.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="2" style="text-align: center;">Connect wallet to see balances</td></tr>`;
-      } else {
-        tokens.forEach(t => {
-          const row = document.createElement('tr');
-          row.className = t.balance > 0 ? '' : 'disabled-row';
-          row.innerHTML = `
-            <td><input type="checkbox" ${t.balance > 0 ? 'checked' : 'disabled'} /> ${t.name}</td>
-            <td>${t.balance.toFixed(6)}</td>
-          `;
-          tbody.appendChild(row);
-        });
-      }
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td><input type="checkbox" ${parseFloat(balance) > 0 ? 'checked' : 'disabled'} /> ${name}</td>
+        <td>${parseFloat(balance).toFixed(6)}</td>
+      `;
+      tbody.appendChild(row);
     }
 
     function simulateSweep() {
       const selected = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'));
       if (selected.length === 0) {
-        alert("No tokens selected to sweep. Please connect a wallet and select tokens with balances.");
+        alert("No tokens selected to sweep.");
         return;
       }
-      const tokensSwept = selected.map(el => el.parentElement.textContent.trim());
-      alert(`Sweeping: ${tokensSwept.join(', ')}\n\nSuccess! (Beta simulation only)`);
+      alert("Sweep simulation successful!");
     }
 
-    // Initialize table
-    window.onload = () => renderTokenTable([]);
+    window.onload = () => {
+      document.querySelector('#tokenTable tbody').innerHTML = '';
+    };
   </script>
 </body>
 </html>
