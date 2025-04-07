@@ -180,7 +180,7 @@
         background: #101010;
       }
       .sidebar a {
-        flex: 1 1 33%; /* Three items per row, adjustable */
+        flex: 1 1 33%; /* Three items per row */
         text-align: center;
         padding: 12px;
         font-size: 0.9rem;
@@ -351,25 +351,62 @@
           signer = provider.getSigner();
           userAddress = await signer.getAddress();
           alert("Wallet connected: " + userAddress);
+          await fetchTokenBalances(userAddress); // Fetch real balances after connection
         } catch (error) {
-          console.error("User rejected the request");
+          console.error("User rejected the request or error occurred:", error);
+          alert("Wallet connection failed.");
         }
       } else {
         alert("MetaMask is not installed. Please install it to use this feature.");
       }
     }
 
-    const tokens = [
-      { name: 'ETH (Ethereum)', symbol: 'ETH', balance: 0.001231 },
-      { name: 'USDT', symbol: 'USDT', balance: 0.000000 },
-      { name: 'USDC', symbol: 'USDC', balance: 0.008452 },
-      { name: 'SHIBA', symbol: 'SHIBA', balance: 0.000000 },
-      { name: 'MATIC', symbol: 'MATIC', balance: 0.003012 },
-      { name: 'LINK', symbol: 'LINK', balance: 0.000000 },
-      { name: 'DAI', symbol: 'DAI', balance: 0.024101 }
-    ];
+    async function fetchTokenBalances(address) {
+      const tokenList = [
+        { name: 'ETH (Ethereum)', symbol: 'ETH', decimals: 18 },
+        { name: 'USDT', symbol: 'USDT', address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', decimals: 6 },
+        { name: 'USDC', symbol: 'USDC', address: '0xA0b86991c1D19D4a2e9Eb0cE3606eB48', decimals: 6 },
+        { name: 'SHIBA', symbol: 'SHIB', address: '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE', decimals: 18 },
+        { name: 'MATIC', symbol: 'MATIC', address: '0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0', decimals: 18 },
+        { name: 'LINK', symbol: 'LINK', address: '0x514910771AF9Ca656af840dff83E8264EcF986CA', decimals: 18 },
+        { name: 'DAI', symbol: 'DAI', address: '0x6B175474E89094C44Da98b954EedeAC495271d0F', decimals: 18 }
+      ];
 
-    function renderTokenTable() {
+      const erc20Abi = [
+        "function balanceOf(address) view returns (uint256)",
+        "function decimals() view returns (uint8)"
+      ];
+      const balances = [];
+
+      try {
+        // Fetch ETH balance
+        const ethBalance = await provider.getBalance(address);
+        balances.push({
+          name: 'ETH (Ethereum)',
+          symbol: 'ETH',
+          balance: parseFloat(ethers.utils.formatEther(ethBalance))
+        });
+
+        // Fetch ERC-20 token balances
+        for (let token of tokenList.slice(1)) {
+          const contract = new ethers.Contract(token.address, erc20Abi, provider);
+          const rawBalance = await contract.balanceOf(address);
+          const formattedBalance = ethers.utils.formatUnits(rawBalance, token.decimals);
+          balances.push({
+            name: token.name,
+            symbol: token.symbol,
+            balance: parseFloat(formattedBalance)
+          });
+        }
+
+        renderTokenTable(balances);
+      } catch (error) {
+        console.error("Error fetching balances:", error);
+        alert("Failed to fetch token balances. Check console for details.");
+      }
+    }
+
+    function renderTokenTable(tokens) {
       const tbody = document.querySelector('#tokenTable tbody');
       tbody.innerHTML = '';
       tokens.forEach(t => {
@@ -387,11 +424,11 @@
       const selected = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'));
       const tokensSwept = selected.map(el => el.parentElement.textContent.trim());
       const sweptList = tokensSwept.join(', ');
-      const message = `✨ Sweeping crumbs from: ${sweptList}\n\n✅ Success! You reclaimed $5.85 worth of stuck crypto.\n\nBETA TEST VERSION!\nNo Balances Swept. Launch Coming Soon!`;
+      const message = `✨ Sweeping crumbs from: ${sweptList}\n\n✅ Success! You reclaimed tiny balances from your wallet.\n\nBETA TEST VERSION!\nNo Balances Swept. Launch Coming Soon!`;
       alert(message);
     }
 
-    window.onload = renderTokenTable;
+    window.onload = () => console.log("App ready. Connect wallet to see real balances.");
   </script>
 </body>
 </html>
