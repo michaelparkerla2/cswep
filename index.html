@@ -158,33 +158,84 @@
   </style>
 </head>
 <body>
-  <!-- BODY CONTENT OMITTED FOR BREVITY, unchanged structure from latest version -->
+  <div class="main-content">
+    <div class="top-banner">CSWEP – The Magic Crypto Sweeper</div>
+    <div class="floating-wallet">
+      <button class="wallet-btn" onclick="showWalletOptions()">Connect Wallet</button>
+    </div>
 
-<script>
-  const tokens = [
-    { name: 'ETH (Ethereum)', symbol: 'ETH' },
-    { name: 'USDT', symbol: 'USDT' },
-    { name: 'USDC', symbol: 'USDC' },
-    { name: 'SHIBA', symbol: 'SHIBA' },
-    { name: 'MATIC', symbol: 'MATIC' },
-    { name: 'LINK', symbol: 'LINK' },
-    { name: 'DAI', symbol: 'DAI' }
-  ];
+    <div class="hero">
+      <img src="cswep.logo.png" alt="CSWEP Logo">
+      <h1>Scans wallets. Finds crumbs.<br>Swaps to cash — like magic.</h1>
+      <p>Recover trapped micro balances from any wallet.</p>
+      <button onclick="document.getElementById('sweepSection').scrollIntoView({ behavior: 'smooth' });">Start Sweeping</button>
+    </div>
 
-  async function updateTable(balances) {
-    const tbody = document.querySelector('#tokenTable tbody');
-    tbody.innerHTML = '';
-    tokens.forEach(t => {
-      const balance = balances[t.symbol] || 0;
-      const row = document.createElement('tr');
-      row.className = balance > 0 ? '' : 'disabled-row';
-      row.innerHTML = `
-        <td><input type="checkbox" ${balance > 0 ? 'checked' : 'disabled'} /> ${t.name}</td>
-        <td>${balance.toFixed(6)}</td>
-      `;
-      tbody.appendChild(row);
-    });
-  }
-</script>
+    <main id="sweepSection">
+      <h2>Free stuck crypto. Convert to cash. No gas!</h2>
+      <p class="subtitle">Sweep dust tokens into real value. Powered by CSWEP.</p>
+      <div class="card">
+        <div class="scrollable-table">
+          <table id="tokenTable">
+            <thead>
+              <tr><th>Token</th><th>Your Balance</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <button class="sweep-btn" onclick="simulateSweep()">Sweep My Crumbs</button>
+      </div>
+      <p class="mission-text">
+        We use special technology to magically deliver users a cash-out experience — converting trapped micro balances into CSWEP tokens or stablecoins, no gas required.
+      </p>
+    </main>
+
+    <div class="social-footer">
+      <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/twitter.png" alt="X"></a>
+      <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/facebook.png" alt="Facebook"></a>
+      <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/telegram-app.png" alt="Telegram"></a>
+      <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/youtube-play.png" alt="YouTube"></a>
+      <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/instagram-new.png" alt="Instagram"></a>
+      <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/linkedin.png" alt="LinkedIn"></a>
+    </div>
+  </div>
+
+  <script>
+    const tokens = [
+      { name: 'ETH (Ethereum)', symbol: 'ETH', balance: 0.001231 },
+      { name: 'USDT', symbol: 'USDT', balance: 0.000000 },
+      { name: 'USDC', symbol: 'USDC', balance: 0.008452 },
+      { name: 'SHIBA', symbol: 'SHIBA', balance: 0.000000 },
+      { name: 'MATIC', symbol: 'MATIC', balance: 0.003012 },
+      { name: 'LINK', symbol: 'LINK', balance: 0.000000 },
+      { name: 'DAI', symbol: 'DAI', balance: 0.024101 }
+    ];
+
+    function renderTokenTable() {
+      const tbody = document.querySelector('#tokenTable tbody');
+      tbody.innerHTML = '';
+      tokens.forEach(t => {
+        const row = document.createElement('tr');
+        row.className = t.balance > 0 ? '' : 'disabled-row';
+        row.innerHTML = `
+          <td><input type="checkbox" ${t.balance > 0 ? 'checked' : 'disabled'} /> ${t.name}</td>
+          <td>${t.balance.toFixed(6)}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function simulateSweep() {
+      const selected = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'));
+      const tokensSwept = selected.map(el => el.parentElement.textContent.trim());
+      alert(`Sweeping crumbs from: ${tokensSwept.join(', ')}\n\n✅ Success! You reclaimed $5.85 worth of stuck crypto.`);
+    }
+
+    function showWalletOptions() {
+      alert("MetaMask connection logic here");
+    }
+
+    window.onload = renderTokenTable;
+  </script>
 </body>
 </html>
