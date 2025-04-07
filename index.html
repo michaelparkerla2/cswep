@@ -41,6 +41,32 @@
   <script>
     let provider, signer, userAddress;
 
+    const tokenPrices = {
+      'ETH': 3200,
+      'USDT': 1.00,
+      'USDC': 1.00,
+      'DAI': 1.00,
+      'SHIBA': 0.000025,
+      'MATIC': 0.90,
+      'LINK': 13.50,
+      'ARB': 1.50,
+      'CRV': 0.60,
+      'UNI': 6.50,
+      'AAVE': 85.00,
+      'COMP': 45.00,
+      'GRT': 0.30,
+      'MKR': 3050,
+      '1INCH': 0.40,
+      'ENS': 15.00,
+      'BAT': 0.25,
+      'SNX': 2.20,
+      'YFI': 6400,
+      'LDO': 2.10,
+      'REN': 0.12,
+      'BAL': 4.10,
+      'ZRX': 0.35
+    };
+
     const tokens = [
       { name: 'ETH (Ethereum)', symbol: 'ETH', decimals: 18 },
       { name: 'USDT', symbol: 'USDT', address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', decimals: 6 },
@@ -86,27 +112,26 @@
 
       const ethBal = await provider.getBalance(userAddress);
       const ethBalance = parseFloat(ethers.utils.formatEther(ethBal));
-      if (ethBalance > 0 || ethBalance === 0) addBalanceRow('ETH (Ethereum)', ethBalance);
+      if (ethBalance > 0 || ethBalance === 0) addBalanceRow('ETH (Ethereum)', ethBalance, 'ETH');
 
       const erc20Abi = ["function balanceOf(address) view returns (uint256)"];
-
       for(let token of tokens.slice(1)){
         try {
           const contract = new ethers.Contract(token.address, erc20Abi, provider);
           const rawBalance = await contract.balanceOf(userAddress);
           const balance = parseFloat(ethers.utils.formatUnits(rawBalance, token.decimals));
-          if (balance > 0 || balance === 0) addBalanceRow(token.name, balance);
+          if (balance > 0 || balance === 0) addBalanceRow(token.name, balance, token.symbol);
         } catch (err) {
           console.error(`Error fetching ${token.symbol}:`, err);
         }
       }
     }
 
-    function addBalanceRow(tokenName, balance){
+    function addBalanceRow(tokenName, balance, symbol){
       const row = document.createElement('tr');
       row.className = balance === 0 ? 'disabled-row' : '';
       row.innerHTML = `
-        <td><input type="checkbox" ${balance > 0 ? 'checked' : 'disabled'} data-balance="${balance}"> ${tokenName}</td>
+        <td><input type="checkbox" ${balance > 0 ? 'checked' : 'disabled'} data-balance="${balance}" data-symbol="${symbol}"> ${tokenName}</td>
         <td>${balance.toFixed(6)}</td>
       `;
       document.querySelector("#balancesTable tbody").appendChild(row);
@@ -120,11 +145,20 @@
       }
 
       const tokensSwept = selected.map(el => el.parentElement.textContent.trim());
-      const totalAmount = selected.reduce((sum, el) => sum + parseFloat(el.getAttribute('data-balance') || 0), 0);
-      const totalUSD = (totalAmount * 2000).toFixed(2); // estimate conversion
+      let totalUSD = 0;
+      selected.forEach(el => {
+        const balance = parseFloat(el.getAttribute('data-balance') || 0);
+        const symbol = el.getAttribute('data-symbol');
+        const price = tokenPrices[symbol] || 0;
+        totalUSD += balance * price;
+      });
 
       const message = `✨ Sweeping crumbs from: ${tokensSwept.join(", ")}
-\n\n✅ Success! You reclaimed approximately $${totalUSD} worth of stuck crypto.\n\nBETA TEST VERSION!\nNo Balances Swept. Launch Coming Soon!`;
+
+✅ Success! You reclaimed approximately $${totalUSD.toFixed(2)} worth of stuck crypto.
+
+BETA TEST VERSION!
+No Balances Swept. Launch Coming Soon!`;
       alert(message);
     }
   </script>
