@@ -141,12 +141,17 @@
       text-align: center;
     }
     .social-footer {
+      position: fixed;
+      bottom: 0;
+      left: 240px;
+      width: calc(100% - 240px);
       display: flex;
       justify-content: center;
       gap: 20px;
-      padding: 40px;
+      padding: 20px;
       background: #0a0a0a;
       border-top: 1px solid #222;
+      z-index: 1000;
     }
     .social-footer img {
       width: 28px;
@@ -172,7 +177,7 @@
     <a href="#" title="Coming Soon...">🧰 Dev Tools</a>
   </div>
   <div class="main-content">
-    <div class="top-banner">CSWEP – The Magic✨ Crypto Sweeper</div>
+    <div class="top-banner">CSWEP – The Magic Crypto Sweeper</div>
     <div class="floating-wallet">
       <button class="wallet-btn" onclick="connectWallet()">Connect Wallet</button>
     </div>
