@@ -162,8 +162,12 @@
     .social-footer img:hover {
       filter: brightness(1.5);
     }
+
+    /* 👇 MOBILE OPTIMIZATION 👇 */
     @media (max-width: 768px) {
-      body { flex-direction: column; }
+      body {
+        flex-direction: column;
+      }
       .sidebar {
         position: relative;
         width: 100%;
@@ -178,16 +182,37 @@
         text-align: center;
         padding: 10px;
       }
-      .main-content { margin-left: 0; width: 100%; }
-      .top-banner { left: 0; width: 100%; font-size: 2rem; padding: 12px; }
-      .floating-wallet { top: 70px; right: 20px; }
-      .hero { margin-top: 140px; height: auto; }
-      .scrollable-table { max-height: 200px; }
-      .social-footer {
-        left: 0; width: 100%; flex-wrap: wrap;
-        gap: 10px; padding: 15px;
+      .main-content {
+        margin-left: 0;
+        width: 100%;
       }
-      .social-footer img { width: 24px; }
+      .top-banner {
+        left: 0;
+        width: 100%;
+        font-size: 2rem;
+        padding: 12px;
+      }
+      .floating-wallet {
+        top: 70px;
+        right: 20px;
+      }
+      .hero {
+        margin-top: 140px;
+        height: auto;
+      }
+      .scrollable-table {
+        max-height: 200px;
+      }
+      .social-footer {
+        left: 0;
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 15px;
+      }
+      .social-footer img {
+        width: 24px;
+      }
     }
   </style>
 </head>
@@ -257,41 +282,25 @@
           signer = provider.getSigner();
           userAddress = await signer.getAddress();
           alert("Wallet connected: " + userAddress);
-          fetchTokenBalances(userAddress);
         } catch (error) {
-          console.error("User rejected the request", error);
-          alert("Connection failed.");
+          console.error("User rejected the request");
         }
       } else {
-        alert("Please install MetaMask.");
+        alert("MetaMask is not installed. Please install it to use this feature.");
       }
     }
 
-    async function fetchTokenBalances(address) {
-      const tokenList = [
-        { name: 'ETH (Ethereum)', symbol: 'ETH', decimals: 18 },
-        { name: 'USDT', symbol: 'USDT', address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', decimals: 6 },
-        { name: 'USDC', symbol: 'USDC', address: '0xA0b86991C6218B36c1D19D4a2e9Eb0cE3606eB48', decimals: 6 },
-        { name: 'DAI', symbol: 'DAI', address: '0x6B175474E89094C44Da98b954EedeAC495271d0F', decimals: 18 },
-        { name: 'SHIBA', symbol: 'SHIBA', address: '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE', decimals: 18 }
-      ];
-      const abi = ["function balanceOf(address) view returns (uint256)"];
-      const balances = [];
+    const tokens = [
+      { name: 'ETH (Ethereum)', symbol: 'ETH', balance: 0.001231 },
+      { name: 'USDT', symbol: 'USDT', balance: 0.000000 },
+      { name: 'USDC', symbol: 'USDC', balance: 0.008452 },
+      { name: 'SHIBA', symbol: 'SHIBA', balance: 0.000000 },
+      { name: 'MATIC', symbol: 'MATIC', balance: 0.003012 },
+      { name: 'LINK', symbol: 'LINK', balance: 0.000000 },
+      { name: 'DAI', symbol: 'DAI', balance: 0.024101 }
+    ];
 
-      const ethBalance = await provider.getBalance(address);
-      balances.push({ name: 'ETH (Ethereum)', symbol: 'ETH', balance: parseFloat(ethers.utils.formatEther(ethBalance)) });
-
-      for (let token of tokenList.slice(1)) {
-        const contract = new ethers.Contract(token.address, abi, provider);
-        const balRaw = await contract.balanceOf(address);
-        const bal = parseFloat(ethers.utils.formatUnits(balRaw, token.decimals));
-        balances.push({ name: token.name, symbol: token.symbol, balance: bal });
-      }
-
-      renderTokenTable(balances);
-    }
-
-    function renderTokenTable(tokens) {
+    function renderTokenTable() {
       const tbody = document.querySelector('#tokenTable tbody');
       tbody.innerHTML = '';
       tokens.forEach(t => {
@@ -309,11 +318,11 @@
       const selected = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'));
       const tokensSwept = selected.map(el => el.parentElement.textContent.trim());
       const sweptList = tokensSwept.join(', ');
-      const message = `✨ Sweeping crumbs from: ${sweptList}\n\n✅ Success! You reclaimed tiny balances from your wallet.\n\nBETA VERSION – No tokens moved.`;
+      const message = `✨ Sweeping crumbs from: ${sweptList}\n\n✅ Success! You reclaimed $5.85 worth of stuck crypto.\n\nBETA TEST VERSION!\nNo Balances Swept. Launch Coming Soon!`;
       alert(message);
     }
 
-    window.onload = () => console.log("CSWEP ready.");
+    window.onload = renderTokenTable;
   </script>
 </body>
 </html>
