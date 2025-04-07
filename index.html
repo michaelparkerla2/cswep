@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>✨ CSWEP – The Magic Crypto Sweeper ✨</title>
+  <title>CSWEP - Crypto Dust Sweeper</title>
   <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <style>
@@ -13,7 +13,6 @@
       color: white;
       font-family: 'Segoe UI', sans-serif;
       display: flex;
-      flex-direction: column;
     }
     .sidebar {
       position: fixed;
@@ -37,7 +36,7 @@
     }
     .main-content {
       margin-left: 240px;
-      width: calc(100% - 240px);
+      width: 100%;
     }
     .top-banner {
       text-align: center;
@@ -138,6 +137,10 @@
       margin-top: 20px;
       margin-bottom: 100px;
     }
+    .dropdown-section {
+      margin: 50px;
+      text-align: center;
+    }
     .social-footer {
       position: fixed;
       bottom: 0;
@@ -159,7 +162,12 @@
     .social-footer img:hover {
       filter: brightness(1.5);
     }
+
+    /* 👇 MOBILE OPTIMIZATION 👇 */
     @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+      }
       .sidebar {
         position: relative;
         width: 100%;
@@ -174,11 +182,13 @@
         text-align: center;
         padding: 10px;
       }
-      .main-content, .top-banner, .social-footer {
-        left: 0;
+      .main-content {
+        margin-left: 0;
         width: 100%;
       }
       .top-banner {
+        left: 0;
+        width: 100%;
         font-size: 2rem;
         padding: 12px;
       }
@@ -194,6 +204,8 @@
         max-height: 200px;
       }
       .social-footer {
+        left: 0;
+        width: 100%;
         flex-wrap: wrap;
         gap: 10px;
         padding: 15px;
@@ -218,16 +230,18 @@
     <a href="#" title="Coming Soon...">🧰 Dev Tools</a>
   </div>
   <div class="main-content">
-    <div class="top-banner">✨ CSWEP – The Magic Crypto Sweeper ✨</div>
+    <div class="top-banner">CSWEP – The Magic Crypto Sweeper</div>
     <div class="floating-wallet">
       <button class="wallet-btn" onclick="connectWallet()">Connect Wallet</button>
     </div>
+
     <div class="hero">
       <img src="cswep.logo.png" alt="CSWEP Logo">
       <h1>Scans wallets. Finds crumbs.<br>Swaps to cash — like magic.</h1>
       <p>Recover trapped micro balances from any wallet.</p>
       <button onclick="document.getElementById('sweepSection').scrollIntoView({ behavior: 'smooth' });">Start Sweeping</button>
     </div>
+
     <main id="sweepSection">
       <h2>Free stuck crypto. Convert to cash. No gas!</h2>
       <p class="subtitle">Sweep dust tokens into real value. Powered by CSWEP.</p>
@@ -246,6 +260,7 @@
         We use special technology to magically deliver users a cash-out experience — converting trapped micro balances into CSWEP tokens or stablecoins, no gas required.
       </p>
     </main>
+
     <div class="social-footer">
       <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/twitter.png" alt="X"></a>
       <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/facebook.png" alt="Facebook"></a>
@@ -255,53 +270,48 @@
       <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/linkedin.png" alt="LinkedIn"></a>
     </div>
   </div>
+
   <script>
     let provider, signer, userAddress;
 
     async function connectWallet() {
       if (window.ethereum) {
-        provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        signer = provider.getSigner();
-        userAddress = await signer.getAddress();
-        alert("Wallet connected: " + userAddress);
-        fetchTokenBalances();
+        try {
+          provider = new ethers.providers.Web3Provider(window.ethereum);
+          await provider.send("eth_requestAccounts", []);
+          signer = provider.getSigner();
+          userAddress = await signer.getAddress();
+          alert("Wallet connected: " + userAddress);
+        } catch (error) {
+          console.error("User rejected the request");
+        }
       } else {
-        alert("MetaMask not found. Please install it.");
+        alert("MetaMask is not installed. Please install it to use this feature.");
       }
     }
 
-    async function fetchTokenBalances() {
-      const tokenList = [
-        { name: 'ETH (Ethereum)', symbol: 'ETH', address: null },
-        { name: 'USDC', symbol: 'USDC', address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48' },
-        { name: 'USDT', symbol: 'USDT', address: '0xdAC17F958D2ee523a2206206994597C13D831ec7' },
-        { name: 'DAI', symbol: 'DAI', address: '0x6B175474E89094C44Da98b954EedeAC495271d0F' },
-        { name: 'MATIC', symbol: 'MATIC', address: '0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0' },
-        { name: 'CRV', symbol: 'CRV', address: '0xD533a949740bb3306d119CC777fa900bA034cd52' }
-      ];
+    const tokens = [
+      { name: 'ETH (Ethereum)', symbol: 'ETH', balance: 0.001231 },
+      { name: 'USDT', symbol: 'USDT', balance: 0.000000 },
+      { name: 'USDC', symbol: 'USDC', balance: 0.008452 },
+      { name: 'SHIBA', symbol: 'SHIBA', balance: 0.000000 },
+      { name: 'MATIC', symbol: 'MATIC', balance: 0.003012 },
+      { name: 'LINK', symbol: 'LINK', balance: 0.000000 },
+      { name: 'DAI', symbol: 'DAI', balance: 0.024101 }
+    ];
 
-      const decimals = 18;
-      const ERC20_ABI = ["function balanceOf(address) view returns (uint)", "function decimals() view returns (uint8)"];
+    function renderTokenTable() {
       const tbody = document.querySelector('#tokenTable tbody');
       tbody.innerHTML = '';
-
-      for (const token of tokenList) {
-        let balance = 0;
-        if (!token.address) {
-          balance = await provider.getBalance(userAddress);
-          balance = ethers.utils.formatEther(balance);
-        } else {
-          const contract = new ethers.Contract(token.address, ERC20_ABI, provider);
-          balance = await contract.balanceOf(userAddress);
-          const tokenDecimals = await contract.decimals();
-          balance = ethers.utils.formatUnits(balance, tokenDecimals);
-        }
+      tokens.forEach(t => {
         const row = document.createElement('tr');
-        row.className = parseFloat(balance) > 0 ? '' : 'disabled-row';
-        row.innerHTML = `<td><input type="checkbox" ${parseFloat(balance) > 0 ? 'checked' : 'disabled'} /> ${token.name}</td><td>${parseFloat(balance).toFixed(6)}</td>`;
+        row.className = t.balance > 0 ? '' : 'disabled-row';
+        row.innerHTML = `
+          <td><input type="checkbox" ${t.balance > 0 ? 'checked' : 'disabled'} /> ${t.name}</td>
+          <td>${t.balance.toFixed(6)}</td>
+        `;
         tbody.appendChild(row);
-      }
+      });
     }
 
     function simulateSweep() {
@@ -312,9 +322,7 @@
       alert(message);
     }
 
-    window.onload = () => {
-      if (window.ethereum) connectWallet();
-    };
+    window.onload = renderTokenTable;
   </script>
 </body>
 </html>
