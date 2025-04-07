@@ -81,7 +81,7 @@
         signer = provider.getSigner();
         userAddress = await signer.getAddress();
         document.getElementById('walletAddress').innerText="Wallet connected: "+userAddress;
-        fetchBalances();
+        await fetchBalances();
       } else {
         alert("Please install MetaMask!");
       }
@@ -108,8 +108,13 @@
         }
       }
 
-      balances.sort((a, b) => b.balance - a.balance);
-      balances.forEach(token => addBalanceRow(token.name, token.balance, token.symbol));
+      const uniqueBalances = Object.values(balances.reduce((acc, curr) => {
+        acc[curr.symbol] = curr;
+        return acc;
+      }, {}));
+
+      uniqueBalances.sort((a, b) => b.balance - a.balance);
+      uniqueBalances.forEach(token => addBalanceRow(token.name, token.balance, token.symbol));
     }
 
     function addBalanceRow(tokenName, balance, symbol){
