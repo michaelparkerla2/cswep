@@ -76,7 +76,7 @@
       justify-content: center;
       height: 80vh;
       text-align: center;
-      padding: 20px;
+      padding: 20px 20px 0 20px;
       margin-top: 0px;
     }
     .hero img {
@@ -163,9 +163,7 @@
       filter: brightness(1.5);
     }
     @media (max-width: 768px) {
-      body {
-        flex-direction: column;
-      }
+      body { flex-direction: column; }
       .sidebar {
         position: relative;
         width: 100%;
@@ -180,37 +178,16 @@
         text-align: center;
         padding: 10px;
       }
-      .main-content {
-        margin-left: 0;
-        width: 100%;
-      }
-      .top-banner {
-        left: 0;
-        width: 100%;
-        font-size: 2rem;
-        padding: 12px;
-      }
-      .floating-wallet {
-        top: 70px;
-        right: 20px;
-      }
-      .hero {
-        margin-top: 140px;
-        height: auto;
-      }
-      .scrollable-table {
-        max-height: 200px;
-      }
+      .main-content { margin-left: 0; width: 100%; }
+      .top-banner { left: 0; width: 100%; font-size: 2rem; padding: 12px; }
+      .floating-wallet { top: 70px; right: 20px; }
+      .hero { margin-top: 140px; height: auto; }
+      .scrollable-table { max-height: 200px; }
       .social-footer {
-        left: 0;
-        width: 100%;
-        flex-wrap: wrap;
-        gap: 10px;
-        padding: 15px;
+        left: 0; width: 100%; flex-wrap: wrap;
+        gap: 10px; padding: 15px;
       }
-      .social-footer img {
-        width: 24px;
-      }
+      .social-footer img { width: 24px; }
     }
   </style>
 </head>
@@ -271,7 +248,6 @@
 
   <script>
     let provider, signer, userAddress;
-    let balances = [];
 
     async function connectWallet() {
       if (window.ethereum) {
@@ -280,43 +256,45 @@
           await provider.send("eth_requestAccounts", []);
           signer = provider.getSigner();
           userAddress = await signer.getAddress();
-          fetchBalances(userAddress);
+          alert("Wallet connected: " + userAddress);
+          fetchTokenBalances(userAddress);
         } catch (error) {
-          console.error("User rejected the request");
+          console.error("User rejected the request", error);
+          alert("Connection failed.");
         }
       } else {
-        alert("MetaMask is not installed. Please install it to use this feature.");
+        alert("Please install MetaMask.");
       }
     }
 
-    async function fetchBalances(address) {
+    async function fetchTokenBalances(address) {
       const tokenList = [
-        { symbol: 'ETH', address: null, decimals: 18 },
-        { symbol: 'USDT', address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', decimals: 6 },
-        { symbol: 'USDC', address: '0xA0b86991C6218B36c1D19D4a2e9Eb0cE3606eB48', decimals: 6 },
-        { symbol: 'DAI', address: '0x6B175474E89094C44Da98b954EedeAC495271d0F', decimals: 18 },
-        { symbol: 'MATIC', address: '0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0', decimals: 18 }
+        { name: 'ETH (Ethereum)', symbol: 'ETH', decimals: 18 },
+        { name: 'USDT', symbol: 'USDT', address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', decimals: 6 },
+        { name: 'USDC', symbol: 'USDC', address: '0xA0b86991C6218B36c1D19D4a2e9Eb0cE3606eB48', decimals: 6 },
+        { name: 'DAI', symbol: 'DAI', address: '0x6B175474E89094C44Da98b954EedeAC495271d0F', decimals: 18 },
+        { name: 'SHIBA', symbol: 'SHIBA', address: '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE', decimals: 18 }
       ];
-
-      const erc20ABI = ["function balanceOf(address) view returns (uint256)"];
-      balances = [];
+      const abi = ["function balanceOf(address) view returns (uint256)"];
+      const balances = [];
 
       const ethBalance = await provider.getBalance(address);
-      balances.push({ name: 'ETH (Ethereum)', balance: parseFloat(ethers.utils.formatEther(ethBalance)) });
+      balances.push({ name: 'ETH (Ethereum)', symbol: 'ETH', balance: parseFloat(ethers.utils.formatEther(ethBalance)) });
 
       for (let token of tokenList.slice(1)) {
-        const contract = new ethers.Contract(token.address, erc20ABI, provider);
-        const raw = await contract.balanceOf(address);
-        balances.push({ name: token.symbol, balance: parseFloat(ethers.utils.formatUnits(raw, token.decimals)) });
+        const contract = new ethers.Contract(token.address, abi, provider);
+        const balRaw = await contract.balanceOf(address);
+        const bal = parseFloat(ethers.utils.formatUnits(balRaw, token.decimals));
+        balances.push({ name: token.name, symbol: token.symbol, balance: bal });
       }
 
-      renderTokenTable();
+      renderTokenTable(balances);
     }
 
-    function renderTokenTable() {
+    function renderTokenTable(tokens) {
       const tbody = document.querySelector('#tokenTable tbody');
       tbody.innerHTML = '';
-      balances.forEach(t => {
+      tokens.forEach(t => {
         const row = document.createElement('tr');
         row.className = t.balance > 0 ? '' : 'disabled-row';
         row.innerHTML = `
@@ -331,17 +309,11 @@
       const selected = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'));
       const tokensSwept = selected.map(el => el.parentElement.textContent.trim());
       const sweptList = tokensSwept.join(', ');
-      const total = balances.filter(b => tokensSwept.includes(b.name)).reduce((acc, b) => acc + b.balance, 0);
-      const message = `✨ Sweeping crumbs from: ${sweptList}
-
-✅ Success! You reclaimed ~$${total.toFixed(2)} worth of stuck crypto.
-
-BETA TEST VERSION!
-No Balances Swept. Launch Coming Soon!`;
+      const message = `✨ Sweeping crumbs from: ${sweptList}\n\n✅ Success! You reclaimed tiny balances from your wallet.\n\nBETA VERSION – No tokens moved.`;
       alert(message);
     }
 
-    window.onload = () => console.log("Ready");
+    window.onload = () => console.log("CSWEP ready.");
   </script>
 </body>
 </html>
