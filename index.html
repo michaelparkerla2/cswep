@@ -48,8 +48,10 @@
     <p class="footer-msg">We use special technology to magically deliver users a cash-out experience — converting trapped micro balances into CSWEP tokens or stablecoins, no gas required.</p>
   </div>
 
-<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-<script>
+
+<script type="module">
+  import { ethers } from 'https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.esm.min.js';
+
   function sweepMyCrumbs() {
     alert("🧹 Sweeping crumbs feature coming soon!");
   }
@@ -67,9 +69,9 @@
     console.log("Connect Wallet clicked");
     if (typeof window.ethereum !== 'undefined') {
       try {
-        provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        signer = provider.getSigner();
+        provider = new ethers.BrowserProvider(window.ethereum);
+        const accounts = await provider.send("eth_requestAccounts", []);
+        signer = await provider.getSigner();
         userAddress = await signer.getAddress();
         console.log("Connected address:", userAddress);
         document.getElementById('walletAddress').innerText = "Wallet connected: " + userAddress;
@@ -89,7 +91,7 @@
     tableBody.innerHTML = '';
 
     const ethBal = await provider.getBalance(userAddress);
-    const ethBalance = parseFloat(ethers.utils.formatEther(ethBal));
+    const ethBalance = parseFloat(ethers.formatEther(ethBal));
 
     const tokens = [
       { name: 'ETH (Ethereum)', symbol: 'ETH', decimals: 18 },
@@ -113,8 +115,8 @@
       let balance = 0;
       try {
         const contract = new ethers.Contract(token.address, erc20Abi, provider);
-        const raw = await contract.balanceOf(userAddress);
-        balance = parseFloat(ethers.utils.formatUnits(raw, token.decimals));
+        const raw = await contract.read.balanceOf(userAddress);
+        balance = parseFloat(ethers.formatUnits(raw, token.decimals));
       } catch (err) {
         console.warn(`Could not fetch ${token.symbol}:`, err);
       }
@@ -125,6 +127,11 @@
       tableBody.appendChild(row);
     }
   }
+
+  window.connectWallet = connectWallet;
+  window.sweepMyCrumbs = sweepMyCrumbs;
+  window.investPresale = investPresale;
+  window.openDashboard = openDashboard;
 </script>
 </body>
 </html>
