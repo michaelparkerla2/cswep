@@ -57,26 +57,47 @@
     <div id="walletAddress"></div>
     <table id="balancesTable">
       <thead><tr><th>Token</th><th>Your Balance</th></tr></thead>
-      <tbody>
-        <tr><td><input type="checkbox" checked> ETH (Ethereum)</td><td>0.015</td></tr>
-        <tr><td><input type="checkbox" checked> USDT</td><td>24.27</td></tr>
-        <tr><td><input type="checkbox" disabled> MATIC</td><td>0</td></tr>
-      </tbody>
+      <tbody></tbody>
     </table>
     <p class="footer-msg">We use special technology to magically deliver users a cash-out experience — converting trapped micro balances into CSWEP tokens or stablecoins, no gas required.</p>
   </div>
   <script>
+    let provider, signer, userAddress;
+
+    const tokens = [
+      { name: 'ETH (Ethereum)', symbol: 'ETH', decimals: 18 },
+      { name: 'USDT', symbol: 'USDT', decimals: 6 },
+      { name: 'MATIC', symbol: 'MATIC', decimals: 18 }
+    ];
+
+    const dummyBalances = {
+      'ETH': 0.015,
+      'USDT': 24.27,
+      'MATIC': 0
+    };
+
     async function connectWallet() {
       if (window.ethereum) {
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        provider = new ethers.providers.Web3Provider(window.ethereum);
         await provider.send("eth_requestAccounts", []);
-        const signer = provider.getSigner();
-        const address = await signer.getAddress();
-        document.getElementById("walletAddress").innerText = `Wallet connected: ${address}`;
-        window.userAddress = address; // save to global scope for access
+        signer = provider.getSigner();
+        userAddress = await signer.getAddress();
+        document.getElementById("walletAddress").innerText = `Wallet connected: ${userAddress}`;
+        populateTokenTable();
       } else {
         alert("Please install MetaMask to connect your wallet.");
       }
+    }
+
+    function populateTokenTable() {
+      const tbody = document.querySelector("#balancesTable tbody");
+      tbody.innerHTML = "";
+      tokens.forEach(token => {
+        const balance = dummyBalances[token.symbol] || 0;
+        const row = document.createElement("tr");
+        row.innerHTML = `<td><input type="checkbox" ${balance > 0 ? 'checked' : 'disabled'}> ${token.name}</td><td>${balance}</td>`;
+        tbody.appendChild(row);
+      });
     }
 
     function simulateSweep() {
@@ -90,8 +111,8 @@
         alert("No token balances selected to sweep.");
         return;
       }
-      const swept = selected.map(row => row.cells[0].innerText.trim()).join(", ");
-      alert(`✨ Simulated sweep complete! Tokens: ${swept}`);
+      const swept = selected.map(row => `${row.innerText.trim()}`).join("\n");
+      alert(`✨ Sweeping the following crumbs:\n\n${swept}\n\n(This is a simulation. No real tokens were swept.)`);
     }
 
     function showPresaleModal() {
