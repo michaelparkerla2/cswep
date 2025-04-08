@@ -34,15 +34,7 @@
     <h2>Free stuck crypto. Convert to cash. No gas!</h2>
     <img src="cswep.logo.png" alt="CSWEP Logo" class="logo">
     <div class="button-row">
-      <div style="display: flex; justify-content: center; width: 100%;">
-        <iframe
-          src="https://connect.thirdweb.com/embed?clientId=e4dd72496aecb9110a3ee79f72937428"
-          width="320"
-          height="64"
-          frameborder="0"
-          style="border-radius: 12px; background: transparent;"
-        ></iframe>
-      </div>
+      <button id="connectBtn">Connect Wallet</button>
       <button onclick="sweepMyCrumbs()">Sweep My Crumbs</button>
       <button onclick="investPresale()">Invest in Presale</button>
       <button onclick="openDashboard()">Open Dashboard</button>
@@ -55,18 +47,29 @@
     </table>
     <p class="footer-msg">We use special technology to magically deliver users a cash-out experience — converting trapped micro balances into CSWEP tokens or stablecoins, no gas required.</p>
   </div>
+
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
 <script>
-  // TEMP test embed injection for iframe visibility
-  const testFrame = document.createElement("iframe");
-  testFrame.src = "https://connect.thirdweb.com/embed?clientId=e4dd72496aecb9110a3ee79f72937428";
-  testFrame.width = "320";
-  testFrame.height = "64";
-  testFrame.style.border = "none";
-  testFrame.style.borderRadius = "12px";
-  testFrame.style.background = "transparent";
-  testFrame.style.display = "block";
-  testFrame.style.margin = "20px auto";
-  document.body.appendChild(testFrame);
+  let provider, signer, userAddress;
+
+  document.getElementById("connectBtn").addEventListener("click", async function () {
+    if (!window.ethereum) return alert("MetaMask not detected. Please install it.");
+    try {
+      provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      signer = provider.getSigner();
+      userAddress = await signer.getAddress();
+      document.getElementById("walletAddress").textContent = `Connected: ${userAddress}`;
+
+      const balance = await provider.getBalance(userAddress);
+      const eth = parseFloat(ethers.utils.formatEther(balance)).toFixed(4);
+      const table = document.querySelector("#balancesTable tbody");
+      table.innerHTML = `<tr><td>ETH</td><td>${eth}</td></tr>`;
+    } catch (err) {
+      console.error("Wallet connection failed", err);
+      alert("Failed to connect wallet.");
+    }
+  });
 </script>
 </body>
 </html>
