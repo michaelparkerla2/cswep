@@ -1,135 +1,166 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CSWEP – The Magic✨ Crypto Sweeper (BETA)</title>
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-  <style>
-    body { background: #0e0e0e; color: white; font-family: 'Segoe UI', sans-serif; margin:0; padding:0; text-align:center; }
-    .main { padding:20px; max-width:600px; margin:auto; }
-    .logo { max-width:100px; display:block; margin:10px auto 20px; }
-    h1 { font-size: 1.2rem; font-weight: normal; margin: 20px 0 0 0; }
-    h1 .subtitle { display: block; font-size: 2rem; font-weight: bold; margin-top: 5px; }
-    h2 { margin: 10px 0 20px 0; font-size: 1.2rem; }
-    button { padding:10px 20px; margin:10px; background:#0a65ff; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold; }
-    button:hover {background:#084dc1;}
-    .button-row { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
-    .banner { background: #1e1e1e; color: #0a65ff; padding: 10px; margin: 10px 0; border-radius: 10px; font-weight: bold; animation: pulse 2s infinite; }
-    @keyframes pulse {
-      0% { opacity: 1; }
-      50% { opacity: 0.6; }
-      100% { opacity: 1; }
-    }
-    table { width:100%; margin-top:20px; border-collapse:collapse; background:#111; border-radius:10px; overflow:hidden; }
-    th, td { padding:12px; border-bottom:1px solid #333; text-align:left; }
-    th { background:#1e1e1e; color:#0a65ff; }
-    .disabled-row { color:#666; opacity:0.6; }
-    .footer-msg { color:#aaa; font-size: 0.9rem; margin-top:30px; }
-    input[type="checkbox"] { margin-right:10px; }
-  </style>
-</head>
-<body>
-  <div class="main">
-    <h1><i>CSWEP</i> (BETA)<span class="subtitle">The Magic✨ Crypto Sweeper</span></h1>
-    <h2>Free stuck crypto. Convert to cash. No gas!</h2>
-    <img src="cswep.logo.png" alt="CSWEP Logo" class="logo">
-    <div class="button-row">
-      <button onclick="connectWallet()">Connect Wallet</button>
-      <button onclick="sweepMyCrumbs()">Sweep My Crumbs</button>
-      <button onclick="investPresale()">Invest in Presale</button>
-      <button onclick="openDashboard()">Open Dashboard</button>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CSWEP Token Presale Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #0f0f0f;
+        color: white;
+        padding: 2rem;
+      }
+      .container {
+        max-width: 600px;
+        margin: auto;
+        background-color: #1c1c1c;
+        padding: 2rem;
+        border-radius: 1rem;
+      }
+      button {
+        background: #04d9ff;
+        color: black;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-top: 1rem;
+      }
+      .token-list {
+        margin-top: 1rem;
+      }
+      .progress {
+        height: 20px;
+        width: 100%;
+        background-color: #333;
+        border-radius: 10px;
+        margin-top: 1rem;
+        overflow: hidden;
+      }
+      .progress-inner {
+        height: 100%;
+        background: #04d9ff;
+        width: 0%;
+        transition: width 0.5s;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>CSWEP Presale Dashboard</h1>
+      <p>Connect wallet to view your balance and contribute to the presale.</p>
+
+      <button id="connectBtn">🔗 Connect Wallet</button>
+      <div id="walletAddress"></div>
+
+      <div class="token-list" id="tokenList"></div>
+
+      <button id="sweepBtn">✨ Sweep My Crumbs</button>
+      <div id="sweepEstimate"></div>
+
+      <h3>Presale Contribution</h3>
+      <button id="contributeETHBtn">💰 Contribute ETH</button>
+      <button id="contributeUSDTBtn">💸 Contribute USDT</button>
+
+      <div class="progress">
+        <div class="progress-inner" id="progressBar"></div>
+      </div>
+      <p id="progressText">0 / 100 ETH raised</p>
+
+      <div id="ownerControls" style="display:none">
+        <h3>Owner Controls</h3>
+        <button id="withdrawBtn">⬆️ Withdraw Funds</button>
+      </div>
     </div>
-    <div class="banner">🔒 Powered by 2 Patent-Pending Web3 Technologies</div>
-    <div id="walletAddress"></div>
-    <table id="balancesTable">
-      <thead><tr><th>Token</th><th>Your Balance</th></tr></thead>
-      <tbody></tbody>
-    </table>
-    <p class="footer-msg">We use special technology to magically deliver users a cash-out experience — converting trapped micro balances into CSWEP tokens or stablecoins, no gas required.</p>
-  </div>
 
-  <script>
-    const presaleAddress = "0x0b782AA2f054cF6C642467FdF8fD01e36FfC6221";
-    const tokenRate = 10000;
-    let provider, signer, userAddress;
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script>
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      let userAddress = "";
 
-    const tokenPrices = {
-      'ETH': 3200, 'USDT': 1.00, 'USDC': 1.00, 'DAI': 1.00, 'SHIBA': 0.000025, 'MATIC': 0.90,
-      'LINK': 13.50, 'UNI': 6.50
-    };
+      const tokens = [
+        { symbol: "ETH", address: "", decimals: 18 },
+        { symbol: "AAVE", address: "0x...", decimals: 18 },
+        { symbol: "COMP", address: "0x...", decimals: 18 },
+        { symbol: "GRT", address: "0x...", decimals: 18 },
+        // Add up to 25 tokens here
+      ];
 
-    const tokens = [
-      { name: 'ETH (Ethereum)', symbol: 'ETH', decimals: 18 },
-      { name: 'USDT', symbol: 'USDT', address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', decimals: 6 },
-      { name: 'USDC', symbol: 'USDC', address: '0xA0b86991C6218B36c1D19D4a2e9Eb0cE3606eB48', decimals: 6 },
-      { name: 'DAI', symbol: 'DAI', address: '0x6B175474E89094C44Da98b954EedeAC495271d0F', decimals: 18 },
-      { name: 'SHIBA', symbol: 'SHIBA', address: '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE', decimals: 18 },
-      { name: 'MATIC', symbol: 'MATIC', address: '0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0', decimals: 18 },
-      { name: 'LINK', symbol: 'LINK', address: '0x514910771AF9Ca656af840dff83E8264EcF986CA', decimals: 18 },
-      { name: 'UNI', symbol: 'UNI', address: '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984', decimals: 18 }
-    ];
+      async function connectWallet() {
+        await provider.send("eth_requestAccounts", []);
+        userAddress = await signer.getAddress();
+        document.getElementById("walletAddress").textContent = `Connected: ${userAddress}`;
 
-    async function connectWallet() {
-      if (!window.ethereum) return alert("Please install MetaMask.");
-      provider = new ethers.providers.Web3Provider(window.ethereum);
-      await provider.send("eth_requestAccounts", []);
-      signer = provider.getSigner();
-      userAddress = await signer.getAddress();
-      document.getElementById("walletAddress").innerText = `Wallet connected: ${userAddress}`;
-      fetchBalances();
-    }
-
-    async function fetchBalances() {
-      const table = document.querySelector("#balancesTable tbody");
-      table.innerHTML = '';
-
-      const ethBal = await provider.getBalance(userAddress);
-      const ethAmount = parseFloat(ethers.utils.formatEther(ethBal));
-      addRow('ETH (Ethereum)', ethAmount.toFixed(6));
-
-      const abi = ["function balanceOf(address) view returns (uint256)"];
-      for (let i = 1; i < tokens.length; i++) {
-        try {
-          const token = tokens[i];
-          const contract = new ethers.Contract(token.address, abi, provider);
-          const balanceRaw = await contract.balanceOf(userAddress);
-          const balance = parseFloat(ethers.utils.formatUnits(balanceRaw, token.decimals));
-          addRow(token.name, balance.toFixed(6));
-        } catch (e) {
-          console.warn("Skip token:", tokens[i].symbol);
+        if (userAddress.toLowerCase() === "0x0b782aa2f054cf6c642467fdf8fd01e36ffc6221") {
+          document.getElementById("ownerControls").style.display = "block";
         }
+
+        fetchBalances();
+        updatePresaleProgress();
       }
-    }
 
-    function addRow(name, balance) {
-      const row = document.createElement("tr");
-      row.innerHTML = `<td>${name}</td><td>${balance}</td>`;
-      document.querySelector("#balancesTable tbody").appendChild(row);
-    }
-
-    async function sweepMyCrumbs() {
-      alert("✨ Sweeping crumbs from detected tokens! Estimated conversion in development.");
-    }
-
-    async function investPresale() {
-      if (!provider || !signer) return alert("Connect your wallet first.");
-      const abi = ["function getContribution(address) view returns (uint256)"];
-      const contract = new ethers.Contract(presaleAddress, abi, provider);
-      try {
-        const val = await contract.getContribution(userAddress);
-        const eth = parseFloat(ethers.utils.formatEther(val));
-        const tokens = eth * tokenRate;
-        alert(`Presale Info:\nSend ETH to: ${presaleAddress}\nRate: 1 ETH = ${tokenRate} CSWEP\n\nWallet: ${userAddress}\nContribution: ${eth} ETH\nEstimated Tokens: ${tokens.toLocaleString()} CSWEP`);
-      } catch (err) {
-        alert("Failed to fetch presale data");
+      async function fetchBalances() {
+        let html = "<h4>Token Balances</h4><ul>";
+        for (let token of tokens) {
+          let balance;
+          if (token.symbol === "ETH") {
+            balance = await provider.getBalance(userAddress);
+            balance = ethers.utils.formatEther(balance);
+          } else {
+            const erc20 = new ethers.Contract(token.address, ["function balanceOf(address) view returns (uint256)", "function decimals() view returns (uint8)"], provider);
+            balance = await erc20.balanceOf(userAddress);
+            balance = ethers.utils.formatUnits(balance, token.decimals);
+          }
+          html += `<li>${token.symbol}: ${parseFloat(balance).toFixed(4)}</li>`;
+        }
+        html += "</ul>";
+        document.getElementById("tokenList").innerHTML = html;
       }
-    }
 
-    async function openDashboard() {
-      if (!userAddress) return alert("Connect your wallet first.");
-      alert("📬 Wallet: " + userAddress + "\nPhase: 1 (Testnet)\nToken tracking and dashboard UI launching soon.");
-    }
-  </script>
-</body>
+      async function sweepMyCrumbs() {
+        Toastify({
+          text: "🧹 Sweeping crumbs... value estimation in dev!",
+          duration: 3000,
+          gravity: "top",
+          backgroundColor: "#04d9ff",
+        }).showToast();
+      }
+
+      async function contributeETH() {
+        const tx = await signer.sendTransaction({
+          to: "YOUR_PRESALE_CONTRACT_ADDRESS",
+          value: ethers.utils.parseEther("0.1"),
+        });
+        await tx.wait();
+        Toastify({ text: "✅ ETH Contribution Received!", duration: 3000 }).showToast();
+        updatePresaleProgress();
+      }
+
+      async function contributeUSDT() {
+        Toastify({ text: "⚙️ USDT support coming soon...", duration: 3000 }).showToast();
+      }
+
+      async function updatePresaleProgress() {
+        // placeholder simulation logic
+        const ethRaised = 17.42; // replace with contract read
+        const percent = (ethRaised / 100) * 100;
+        document.getElementById("progressBar").style.width = `${percent}%`;
+        document.getElementById("progressText").innerText = `${ethRaised.toFixed(2)} / 100 ETH raised`;
+      }
+
+      async function withdrawFunds() {
+        Toastify({ text: "⬆️ Withdraw triggered (simulated)", duration: 3000 }).showToast();
+      }
+
+      document.getElementById("connectBtn").onclick = connectWallet;
+      document.getElementById("sweepBtn").onclick = sweepMyCrumbs;
+      document.getElementById("contributeETHBtn").onclick = contributeETH;
+      document.getElementById("contributeUSDTBtn").onclick = contributeUSDT;
+      document.getElementById("withdrawBtn").onclick = withdrawFunds;
+    </script>
+  </body>
 </html>
