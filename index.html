@@ -34,7 +34,7 @@
     <h2>Free stuck crypto. Convert to cash. No gas!</h2>
     <img src="cswep.logo.png" alt="CSWEP Logo" class="logo">
     <div class="button-row">
-      <button id="connectBtn">Connect Wallet</button>
+      <button id="connectBtn">Connect with MetaMask / WalletConnect</button>
       <button onclick="sweepMyCrumbs()">Sweep My Crumbs</button>
       <button onclick="investPresale()">Invest in Presale</button>
       <button onclick="openDashboard()">Open Dashboard</button>
@@ -49,17 +49,42 @@
   </div>
 
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.7.8/dist/umd/index.min.js"></script>
 <script>
   let provider, signer, userAddress;
 
   document.getElementById("connectBtn").addEventListener("click", async function () {
-    if (typeof window.ethereum === 'undefined') {
-      alert("MetaMask not detected. Please install it.");
-      return;
-    }
+    const providerOptions = {
+      walletconnect: {
+        package: window.WalletConnectProvider.default,
+        options: {
+          infuraId: "a8e46b8dcd474ad2a48a69e7d3804cda" // You can use your own
+        }
+      }
+    };
+
+    const web3Modal = new window.Web3Modal.default({
+      cacheProvider: false,
+      providerOptions
+    });
 
     try {
-      await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const instance = await web3Modal.connect();
+      provider = new ethers.providers.Web3Provider(instance);
+      signer = provider.getSigner();
+      userAddress = await signer.getAddress();
+
+      document.getElementById("walletAddress").textContent = `Connected: ${userAddress}`;
+
+      const balance = await provider.getBalance(userAddress);
+      const eth = parseFloat(ethers.utils.formatEther(balance)).toFixed(4);
+      const table = document.querySelector("#balancesTable tbody");
+      table.innerHTML = `<tr><td>ETH</td><td>${eth}</td></tr>`;
+    } catch (err) {
+      console.error("Wallet connection failed", err);
+      alert("Wallet connection failed: " + (err.message || "Unknown error"));
+    }
+  });
       provider = new ethers.providers.Web3Provider(window.ethereum);
       signer = provider.getSigner();
       userAddress = await signer.getAddress();
@@ -76,5 +101,6 @@
     }
   });
 </script>
+<script src="https://unpkg.com/web3modal@1.9.12/dist/index.js"></script>
 </body>
 </html>
