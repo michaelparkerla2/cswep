@@ -50,7 +50,8 @@
       <button onclick="showDashboard()">Open Dashboard</button>
       <button id="withdrawBtn" style="display:none; background:#d00000">Withdraw Funds</button>
     </div>
-    <div class="banner">🔐 Powered by 2 Patent-Pending Web3 Technologies</div>
+    <div class="banner">🔐 Powered by 2 Patent-Pending Web3 Technologies
+    </div>
     <div id="walletAddress"></div>
     <table id="balancesTable">
       <thead><tr><th>Token</th><th>Your Balance</th></tr></thead>
@@ -74,8 +75,24 @@
   <div id="toast">Test</div>
 
   <script>
+    async function connectWallet() {
+      console.log("connectWallet triggered");
+    }
+
+    async function simulateSweep() {
+      console.log("simulateSweep triggered");
+    }
+
+    function showPresaleModal() {
+      document.getElementById("presaleModal").style.display = "block";
+    }
+
+    function hidePresaleModal() {
+      document.getElementById("presaleModal").style.display = "none";
+    }
+
     function showDashboard() {
-      showPresaleModal();
+      alert("Dashboard coming soon: contribution tracking, token estimate, and phase info.");
     }
   </script>
 </body>
