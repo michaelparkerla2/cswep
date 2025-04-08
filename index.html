@@ -92,7 +92,7 @@
           const c = new ethers.Contract(t.address, abi, provider);
           const b = await c.balanceOf(userAddress);
           const human = parseFloat(ethers.utils.formatUnits(b, t.decimals));
-          addRow(t.name, human.toFixed(6));
+          if (human > 0) addRow(t.name, human.toFixed(6));
         } catch (err) {
           console.warn(`Skipping ${t.symbol}`);
         }
@@ -106,7 +106,7 @@
     }
 
     function simulateSweep() {
-      alert("✨ Sweeping crumbs from detected tokens! Estimated USD conversion simulated.");
+      alert("✨ Simulated sweep complete! Token value detection restored.");
     }
 
     function showPresaleModal() {
