@@ -85,4 +85,51 @@
       table.innerHTML = '';
 
       const ethBal = await provider.getBalance(userAddress);
-      const ethAmount = pa
+      const ethAmount = parseFloat(ethers.utils.formatEther(ethBal));
+      addRow('ETH (Ethereum)', ethAmount.toFixed(6));
+
+      const abi = ["function balanceOf(address) view returns (uint256)"];
+      for (let i = 1; i < tokens.length; i++) {
+        try {
+          const token = tokens[i];
+          const contract = new ethers.Contract(token.address, abi, provider);
+          const balanceRaw = await contract.balanceOf(userAddress);
+          const balance = parseFloat(ethers.utils.formatUnits(balanceRaw, token.decimals));
+          addRow(token.name, balance.toFixed(6));
+        } catch (e) {
+          console.warn("Skip token:", tokens[i].symbol);
+        }
+      }
+    }
+
+    function addRow(name, balance) {
+      const row = document.createElement("tr");
+      row.innerHTML = `<td>${name}</td><td>${balance}</td>`;
+      document.querySelector("#balancesTable tbody").appendChild(row);
+    }
+
+    async function sweepMyCrumbs() {
+      alert("✨ Sweeping crumbs from detected tokens! Estimated conversion in development.");
+    }
+
+    async function investPresale() {
+      if (!provider || !signer) return alert("Connect your wallet first.");
+      const abi = ["function getContribution(address) view returns (uint256)"];
+      const contract = new ethers.Contract(presaleAddress, abi, provider);
+      try {
+        const val = await contract.getContribution(userAddress);
+        const eth = parseFloat(ethers.utils.formatEther(val));
+        const tokens = eth * tokenRate;
+        alert(`Presale Info:\nSend ETH to: ${presaleAddress}\nRate: 1 ETH = ${tokenRate} CSWEP\n\nWallet: ${userAddress}\nContribution: ${eth} ETH\nEstimated Tokens: ${tokens.toLocaleString()} CSWEP`);
+      } catch (err) {
+        alert("Failed to fetch presale data");
+      }
+    }
+
+    async function openDashboard() {
+      if (!userAddress) return alert("Connect your wallet first.");
+      alert("📬 Wallet: " + userAddress + "\nPhase: 1 (Testnet)\nToken tracking and dashboard UI launching soon.");
+    }
+  </script>
+</body>
+</html>
