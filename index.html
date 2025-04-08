@@ -36,7 +36,7 @@
     <img src="cswep.logo.png" alt="CSWEP Logo" class="logo">
     <div class="button-row">
       <button onclick="connectWallet()" id="connectBtn">Connect Wallet</button>
-      <button onclick="simulateSweep()">Sweep My Crumbs</button>
+      <button onclick="sweepTokens()">Sweep My Crumbs</button>
       <button onclick="showPresaleModal()">Invest in Presale</button>
       <button onclick="openDashboard()">Open Dashboard</button>
     </div>
@@ -92,7 +92,7 @@
           const c = new ethers.Contract(t.address, abi, provider);
           const b = await c.balanceOf(userAddress);
           const human = parseFloat(ethers.utils.formatUnits(b, t.decimals));
-          if (human > 0) addRow(t.name, human.toFixed(6));
+          addRow(t.name, human.toFixed(6));
         } catch (err) {
           console.warn(`Skipping ${t.symbol}`);
         }
@@ -105,7 +105,7 @@
       document.querySelector("#balancesTable tbody").appendChild(row);
     }
 
-    function simulateSweep() {
+    function sweepTokens() {
       alert("✨ Simulated sweep complete! Token value detection restored.");
     }
 
