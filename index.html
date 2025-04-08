@@ -69,17 +69,23 @@
         const signer = provider.getSigner();
         const address = await signer.getAddress();
         document.getElementById("walletAddress").innerText = `Wallet connected: ${address}`;
+        window.userAddress = address; // save to global scope for access
       } else {
         alert("Please install MetaMask to connect your wallet.");
       }
     }
 
     function simulateSweep() {
-      alert("Simulated sweep initiated! (Token balance detection coming soon.)");
+      const table = document.getElementById("balancesTable").getElementsByTagName('tbody')[0];
+      if (!table || table.rows.length === 0) {
+        alert("No token balances detected to sweep yet. Connect your wallet and try again.");
+        return;
+      }
+      alert("Simulated sweep initiated for detected balances. (Real logic coming soon.)");
     }
 
     function showPresaleModal() {
-      alert("Presale modal triggered. (UI under development)");
+      alert("Presale modal coming soon! Contributions will be tracked and shown live.");
     }
 
     function showDashboard() {
