@@ -50,6 +50,9 @@
 
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.7.8/dist/umd/index.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.7.8/dist/umd/index.min.js"></script>
+<script src="https://unpkg.com/web3modal@1.9.12/dist/index.js"></script>
 <script>
   let provider, signer, userAddress;
 
@@ -58,7 +61,7 @@
       walletconnect: {
         package: window.WalletConnectProvider.default,
         options: {
-          infuraId: "a8e46b8dcd474ad2a48a69e7d3804cda" // You can use your own
+          infuraId: "a8e46b8dcd474ad2a48a69e7d3804cda"
         }
       }
     };
@@ -85,22 +88,6 @@
       alert("Wallet connection failed: " + (err.message || "Unknown error"));
     }
   });
-      provider = new ethers.providers.Web3Provider(window.ethereum);
-      signer = provider.getSigner();
-      userAddress = await signer.getAddress();
-
-      document.getElementById("walletAddress").textContent = `Connected: ${userAddress}`;
-
-      const balance = await provider.getBalance(userAddress);
-      const eth = parseFloat(ethers.utils.formatEther(balance)).toFixed(4);
-      const table = document.querySelector("#balancesTable tbody");
-      table.innerHTML = `<tr><td>ETH</td><td>${eth}</td></tr>`;
-    } catch (err) {
-      console.error("Wallet connection failed", err);
-      alert("Wallet connection failed: " + (err.message || "Unknown error"));
-    }
-  });
 </script>
-<script src="https://unpkg.com/web3modal@1.9.12/dist/index.js"></script>
 </body>
 </html>
