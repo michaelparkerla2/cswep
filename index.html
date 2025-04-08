@@ -1,137 +1,148 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CSWEP – The Magic✨ Crypto Sweeper (BETA)</title>
-  <style>
-    body { background: #0e0e0e; color: white; font-family: 'Segoe UI', sans-serif; margin:0; padding:0; text-align:center; }
-    .main { padding:20px; max-width:600px; margin:auto; }
-    .logo { max-width:100px; display:block; margin:10px auto 20px; }
-    h1 { font-size: 1.2rem; font-weight: normal; margin: 20px 0 0 0; }
-    h1 .subtitle { display: block; font-size: 2rem; font-weight: bold; margin-top: 5px; }
-    h2 { margin: 10px 0 20px 0; font-size: 1.2rem; }
-    button { padding:10px 20px; margin:10px; background:#0a65ff; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold; }
-    button:hover {background:#084dc1;}
-    .button-row { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
-    .banner { background: #1e1e1e; color: #0a65ff; padding: 10px; margin: 10px 0; border-radius: 10px; font-weight: bold; animation: pulse 2s infinite; }
-    @keyframes pulse {
-      0% { opacity: 1; }
-      50% { opacity: 0.6; }
-      100% { opacity: 1; }
-    }
-    table { width:100%; margin-top:20px; border-collapse:collapse; background:#111; border-radius:10px; overflow:hidden; }
-    th, td { padding:12px; border-bottom:1px solid #333; text-align:left; }
-    th { background:#1e1e1e; color:#0a65ff; }
-    .disabled-row { color:#666; opacity:0.6; }
-    .footer-msg { color:#aaa; font-size: 0.9rem; margin-top:30px; }
-    input[type="checkbox"] { margin-right:10px; }
-  </style>
-</head>
-<body>
-  <div class="main">
-    <h1><i>CSWEP</i> (BETA)<span class="subtitle">The Magic✨ Crypto Sweeper</span></h1>
-    <h2>Free stuck crypto. Convert to cash. No gas!</h2>
-    <img src="cswep.logo.png" alt="CSWEP Logo" class="logo">
-    <div class="button-row">
-      <button onclick="connectWallet()" id="connectBtn">Connect Wallet</button>
-      <button onclick="sweepMyCrumbs()">Sweep My Crumbs</button>
-      <button onclick="investPresale()">Invest in Presale</button>
-      <button onclick="openDashboard()">Open Dashboard</button>
+// File: src/main.jsx
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App.jsx';
+import './index.css';
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+
+
+// File: src/App.jsx
+import React from 'react';
+import Hero from './components/Hero';
+import CountdownTimer from './components/CountdownTimer';
+import WalletConnect from './components/WalletConnect';
+
+function App() {
+  return (
+    <div className="bg-black text-white min-h-screen font-sans">
+      <Hero />
+      <CountdownTimer />
+      <WalletConnect />
     </div>
-    <div class="banner">🔒 Powered by 2 Patent-Pending Web3 Technologies</div>
-    <div id="walletAddress"></div>
-    <table id="balancesTable">
-      <thead><tr><th>Token</th><th>Your Balance</th></tr></thead>
-      <tbody></tbody>
-    </table>
-    <p class="footer-msg">We use special technology to magically deliver users a cash-out experience — converting trapped micro balances into CSWEP tokens or stablecoins, no gas required.</p>
-  </div>
+  );
+}
+
+export default App;
 
 
-<script type="module">
-  import { ethers } from 'https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.esm.min.js';
+// File: src/components/Hero.jsx
+import React from 'react';
 
-  function sweepMyCrumbs() {
-    alert("🧹 Sweeping crumbs feature coming soon!");
-  }
-  function investPresale() {
-    alert("Presale functionality not yet implemented.");
-  }
-  function openDashboard() {
-    alert("Dashboard coming soon!");
-  }
+const Hero = () => {
+  return (
+    <section className="w-full h-screen flex flex-col justify-center items-center text-center bg-gradient-to-b from-black via-gray-900 to-black p-4">
+      <img src="/logo.png" alt="CSWEP Logo" className="w-48 mb-6" />
+      <h1 className="text-4xl md:text-6xl font-bold text-blue-400 drop-shadow-lg">Welcome to CSWEP</h1>
+      <p className="text-gray-300 mt-4 max-w-xl">The Crypto Sweeper Project – Join the presale and track your holdings in real-time as we build the future of wallet cleanup tech.</p>
+    </section>
+  );
+};
 
-  console.log("App loaded. Checking for MetaMask...");
-  let provider, signer, userAddress;
+export default Hero;
 
-  async function connectWallet() {
-    console.log("Connect Wallet clicked");
-    if (typeof window.ethereum !== 'undefined') {
-      try {
-        provider = new ethers.BrowserProvider(window.ethereum);
-        const accounts = await provider.send("eth_requestAccounts", []);
-        signer = await provider.getSigner();
-        userAddress = await signer.getAddress();
-        console.log("Connected address:", userAddress);
-        document.getElementById('walletAddress').innerText = "Wallet connected: " + userAddress;
-        await fetchBalances();
-      } catch (err) {
-        console.error("Error connecting to wallet:", err);
-        alert("Something went wrong. Check the console for details.");
+
+// File: src/components/CountdownTimer.jsx
+import React, { useEffect, useState } from 'react';
+
+const targetDate = new Date("2025-04-13T00:00:00Z");
+
+const CountdownTimer = () => {
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = new Date();
+      const distance = targetDate - now;
+
+      if (distance < 0) {
+        clearInterval(interval);
+        return;
       }
-    } else {
-      console.warn("MetaMask not detected");
-      alert("Please install MetaMask to use this feature: https://metamask.io/download.html");
-    }
+
+      setTimeLeft({
+        days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((distance / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((distance / 1000 / 60) % 60),
+        seconds: Math.floor((distance / 1000) % 60)
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <section className="text-center py-10 bg-gray-900">
+      <h2 className="text-3xl font-bold text-white">Phase 1 ends in</h2>
+      <div className="flex justify-center mt-6 space-x-6 text-xl">
+        <div><span className="block text-blue-400 text-4xl">{timeLeft.days}</span>Days</div>
+        <div><span className="block text-blue-400 text-4xl">{timeLeft.hours}</span>Hours</div>
+        <div><span className="block text-blue-400 text-4xl">{timeLeft.minutes}</span>Minutes</div>
+        <div><span className="block text-blue-400 text-4xl">{timeLeft.seconds}</span>Seconds</div>
+      </div>
+    </section>
+  );
+};
+
+export default CountdownTimer;
+
+
+// File: src/components/WalletConnect.jsx
+import React from 'react';
+
+const WalletConnect = () => {
+  return (
+    <section className="bg-black text-center py-12">
+      <h3 className="text-xl text-white mb-4">Connect your wallet to view your CSWEP balance</h3>
+      <button className="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-full text-white font-semibold transition-all">
+        Connect Wallet
+      </button>
+    </section>
+  );
+};
+
+export default WalletConnect;
+
+
+// File: src/index.css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: #000000;
+  color: #ffffff;
+}
+
+
+// File: vite.config.js
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    open: true
   }
+});
 
-  async function fetchBalances() {
-    const tableBody = document.querySelector("#balancesTable tbody");
-    tableBody.innerHTML = '';
 
-    const ethBal = await provider.getBalance(userAddress);
-    const ethBalance = parseFloat(ethers.formatEther(ethBal));
-
-    const tokens = [
-      { name: 'ETH (Ethereum)', symbol: 'ETH', decimals: 18 },
-      { name: 'USDT', symbol: 'USDT', address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', decimals: 6 },
-      { name: 'USDC', symbol: 'USDC', address: '0xA0b86991C6218B36c1D19D4a2e9Eb0cE3606eB48', decimals: 6 },
-      { name: 'DAI', symbol: 'DAI', address: '0x6B175474E89094C44Da98b954EedeAC495271d0F', decimals: 18 },
-      { name: 'SHIBA', symbol: 'SHIBA', address: '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE', decimals: 18 },
-      { name: 'MATIC', symbol: 'MATIC', address: '0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0', decimals: 18 },
-      { name: 'LINK', symbol: 'LINK', address: '0x514910771AF9Ca656af840dff83E8264EcF986CA', decimals: 18 },
-      { name: 'ARB', symbol: 'ARB', address: '0x912CE59144191C1204E64559FE8253a0e49E6548', decimals: 18 },
-      { name: 'CRV', symbol: 'CRV', address: '0xD533a949740bb3306d119CC777fa900bA034cd52', decimals: 18 },
-      { name: 'UNI', symbol: 'UNI', address: '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984', decimals: 18 }
-    ];
-
-    const ethRow = document.createElement('tr');
-    ethRow.innerHTML = `<td><input type="checkbox" checked data-symbol="ETH" data-balance="${ethBalance.toFixed(6)}"> ETH</td><td>${ethBalance.toFixed(4)}</td>`;
-    tableBody.appendChild(ethRow);
-
-    const erc20Abi = ["function balanceOf(address) view returns (uint256)"];
-    for (let token of tokens.slice(1)) {
-      let balance = 0;
-      try {
-        const contract = new ethers.Contract(token.address, erc20Abi, provider);
-        const raw = await contract.read.balanceOf(userAddress);
-        balance = parseFloat(ethers.formatUnits(raw, token.decimals));
-      } catch (err) {
-        console.warn(`Could not fetch ${token.symbol}:`, err);
+// File: tailwind.config.js
+module.exports = {
+  content: ["./index.html", "./src/**/*.{js,jsx}"],
+  theme: {
+    extend: {
+      colors: {
+        cswepBlue: '#0ea5e9',
+        darkGray: '#111827'
       }
-      const row = document.createElement('tr');
-      const isDisabled = balance === 0;
-      row.className = isDisabled ? 'disabled-row' : '';
-      row.innerHTML = `<td><input type="checkbox" ${isDisabled ? 'disabled' : 'checked'} data-symbol="${token.symbol}" data-balance="${balance.toFixed(6)}"> ${token.symbol}</td><td>${balance.toFixed(4)}</td>`;
-      tableBody.appendChild(row);
-    }
-  }
-
-  window.connectWallet = connectWallet;
-  window.sweepMyCrumbs = sweepMyCrumbs;
-  window.investPresale = investPresale;
-  window.openDashboard = openDashboard;
-</script>
-</body>
-</html>
+    },
+  },
+  plugins: [],
+};
