@@ -27,6 +27,10 @@
     .disabled-row { color:#666; opacity:0.6; }
     .footer-msg { color:#aaa; font-size: 0.9rem; margin-top:30px; }
     input[type="checkbox"] { margin-right:10px; }
+    .modal { display: none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.7); }
+    .modal-content { background-color: #1e1e1e; margin: 15% auto; padding: 20px; border: 1px solid #444; width: 90%; max-width: 400px; border-radius: 10px; color: #fff; }
+    .close-btn { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+    .close-btn:hover, .close-btn:focus { color: #fff; text-decoration: none; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -174,6 +178,7 @@ No Balances Swept. Launch Coming Soon!`;
     function showPresaleModal() {
       document.getElementById('presaleModal').style.display = 'block';
     }
+
     function hidePresaleModal() {
       document.getElementById('presaleModal').style.display = 'none';
     }
