@@ -1,166 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CSWEP Token Presale Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        background-color: #0f0f0f;
-        color: white;
-        padding: 2rem;
-      }
-      .container {
-        max-width: 600px;
-        margin: auto;
-        background-color: #1c1c1c;
-        padding: 2rem;
-        border-radius: 1rem;
-      }
-      button {
-        background: #04d9ff;
-        color: black;
-        border: none;
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px;
-        cursor: pointer;
-        margin-top: 1rem;
-      }
-      .token-list {
-        margin-top: 1rem;
-      }
-      .progress {
-        height: 20px;
-        width: 100%;
-        background-color: #333;
-        border-radius: 10px;
-        margin-top: 1rem;
-        overflow: hidden;
-      }
-      .progress-inner {
-        height: 100%;
-        background: #04d9ff;
-        width: 0%;
-        transition: width 0.5s;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <h1>CSWEP Presale Dashboard</h1>
-      <p>Connect wallet to view your balance and contribute to the presale.</p>
-
-      <button id="connectBtn">🔗 Connect Wallet</button>
-      <div id="walletAddress"></div>
-
-      <div class="token-list" id="tokenList"></div>
-
-      <button id="sweepBtn">✨ Sweep My Crumbs</button>
-      <div id="sweepEstimate"></div>
-
-      <h3>Presale Contribution</h3>
-      <button id="contributeETHBtn">💰 Contribute ETH</button>
-      <button id="contributeUSDTBtn">💸 Contribute USDT</button>
-
-      <div class="progress">
-        <div class="progress-inner" id="progressBar"></div>
-      </div>
-      <p id="progressText">0 / 100 ETH raised</p>
-
-      <div id="ownerControls" style="display:none">
-        <h3>Owner Controls</h3>
-        <button id="withdrawBtn">⬆️ Withdraw Funds</button>
-      </div>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSWEP – The Magic✨ Crypto Sweeper (BETA)</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <style>
+    body { background: #0e0e0e; color: white; font-family: 'Segoe UI', sans-serif; margin:0; padding:0; text-align:center; }
+    .main { padding:20px; max-width:600px; margin:auto; }
+    .logo { max-width:100px; display:block; margin:10px auto 20px; }
+    h1 { font-size: 1.2rem; font-weight: normal; margin: 20px 0 0 0; }
+    h1 .subtitle { display: block; font-size: 2rem; font-weight: bold; margin-top: 5px; }
+    h2 { margin: 10px 0 20px 0; font-size: 1.2rem; }
+    button { padding:10px 20px; margin:10px; background:#0a65ff; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold; }
+    button:hover {background:#084dc1;}
+    .button-row { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+    .banner { background: #1e1e1e; color: #0a65ff; padding: 10px; margin: 10px 0; border-radius: 10px; font-weight: bold; animation: pulse 2s infinite; }
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.6; }
+      100% { opacity: 1; }
+    }
+    table { width:100%; margin-top:20px; border-collapse:collapse; background:#111; border-radius:10px; overflow:hidden; }
+    th, td { padding:12px; border-bottom:1px solid #333; text-align:left; }
+    th { background:#1e1e1e; color:#0a65ff; }
+    .disabled-row { color:#666; opacity:0.6; }
+    .footer-msg { color:#aaa; font-size: 0.9rem; margin-top:30px; }
+    input[type="checkbox"] { margin-right:10px; }
+  </style>
+</head>
+<body>
+  <div class="main">
+    <h1><i>CSWEP</i> (BETA)<span class="subtitle">The Magic✨ Crypto Sweeper</span></h1>
+    <h2>Free stuck crypto. Convert to cash. No gas!</h2>
+    <img src="cswep.logo.png" alt="CSWEP Logo" class="logo">
+    <div class="button-row">
+      <button onclick="connectWallet()">Connect Wallet</button>
+      <button onclick="sweepMyCrumbs()">Sweep My Crumbs</button>
+      <button onclick="investPresale()">Invest in Presale</button>
+      <button onclick="openDashboard()">Open Dashboard</button>
     </div>
+    <div class="banner">🔒 Powered by 2 Patent-Pending Web3 Technologies</div>
+    <div id="walletAddress"></div>
+    <table id="balancesTable">
+      <thead><tr><th>Token</th><th>Your Balance</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <p class="footer-msg">We use special technology to magically deliver users a cash-out experience — converting trapped micro balances into CSWEP tokens or stablecoins, no gas required.</p>
+  </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-    <script>
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      let userAddress = "";
+  <script>
+    let provider, signer, userAddress;
 
-      const tokens = [
-        { symbol: "ETH", address: "", decimals: 18 },
-        { symbol: "AAVE", address: "0x...", decimals: 18 },
-        { symbol: "COMP", address: "0x...", decimals: 18 },
-        { symbol: "GRT", address: "0x...", decimals: 18 },
-        // Add up to 25 tokens here
-      ];
-
-      async function connectWallet() {
-        await provider.send("eth_requestAccounts", []);
-        userAddress = await signer.getAddress();
-        document.getElementById("walletAddress").textContent = `Connected: ${userAddress}`;
-
-        if (userAddress.toLowerCase() === "0x0b782aa2f054cf6c642467fdf8fd01e36ffc6221") {
-          document.getElementById("ownerControls").style.display = "block";
-        }
-
-        fetchBalances();
-        updatePresaleProgress();
+    async function connectWallet() {
+      if (!window.ethereum) {
+        alert("MetaMask is not installed. Please install it to use this feature.");
+        return;
       }
 
-      async function fetchBalances() {
-        let html = "<h4>Token Balances</h4><ul>";
-        for (let token of tokens) {
-          let balance;
-          if (token.symbol === "ETH") {
-            balance = await provider.getBalance(userAddress);
-            balance = ethers.utils.formatEther(balance);
-          } else {
-            const erc20 = new ethers.Contract(token.address, ["function balanceOf(address) view returns (uint256)", "function decimals() view returns (uint8)"], provider);
-            balance = await erc20.balanceOf(userAddress);
-            balance = ethers.utils.formatUnits(balance, token.decimals);
-          }
-          html += `<li>${token.symbol}: ${parseFloat(balance).toFixed(4)}</li>`;
-        }
-        html += "</ul>";
-        document.getElementById("tokenList").innerHTML = html;
-      }
+      provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      signer = provider.getSigner();
+      userAddress = await signer.getAddress();
 
-      async function sweepMyCrumbs() {
-        Toastify({
-          text: "🧹 Sweeping crumbs... value estimation in dev!",
-          duration: 3000,
-          gravity: "top",
-          backgroundColor: "#04d9ff",
-        }).showToast();
-      }
+      document.getElementById("walletAddress").innerText = `Wallet connected: ${userAddress}`;
+      fetchBalances();
+    }
 
-      async function contributeETH() {
-        const tx = await signer.sendTransaction({
-          to: "YOUR_PRESALE_CONTRACT_ADDRESS",
-          value: ethers.utils.parseEther("0.1"),
-        });
-        await tx.wait();
-        Toastify({ text: "✅ ETH Contribution Received!", duration: 3000 }).showToast();
-        updatePresaleProgress();
-      }
+    async function fetchBalances() {
+      const table = document.querySelector("#balancesTable tbody");
+      table.innerHTML = '';
 
-      async function contributeUSDT() {
-        Toastify({ text: "⚙️ USDT support coming soon...", duration: 3000 }).showToast();
-      }
+      if (!provider || !userAddress) return;
 
-      async function updatePresaleProgress() {
-        // placeholder simulation logic
-        const ethRaised = 17.42; // replace with contract read
-        const percent = (ethRaised / 100) * 100;
-        document.getElementById("progressBar").style.width = `${percent}%`;
-        document.getElementById("progressText").innerText = `${ethRaised.toFixed(2)} / 100 ETH raised`;
+      try {
+        const ethBal = await provider.getBalance(userAddress);
+        const ethAmount = ethers.utils.formatEther(ethBal);
+        const row = `<tr><td>ETH</td><td>${parseFloat(ethAmount).toFixed(4)}</td></tr>`;
+        table.insertAdjacentHTML("beforeend", row);
+      } catch (error) {
+        console.error("Error fetching ETH balance:", error);
       }
-
-      async function withdrawFunds() {
-        Toastify({ text: "⬆️ Withdraw triggered (simulated)", duration: 3000 }).showToast();
-      }
-
-      document.getElementById("connectBtn").onclick = connectWallet;
-      document.getElementById("sweepBtn").onclick = sweepMyCrumbs;
-      document.getElementById("contributeETHBtn").onclick = contributeETH;
-      document.getElementById("contributeUSDTBtn").onclick = contributeUSDT;
-      document.getElementById("withdrawBtn").onclick = withdrawFunds;
-    </script>
-  </body>
+    }
+  </script>
+</body>
 </html>
