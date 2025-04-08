@@ -48,20 +48,41 @@
     <p class="footer-msg">We use special technology to magically deliver users a cash-out experience — converting trapped micro balances into CSWEP tokens or stablecoins, no gas required.</p>
   </div>
 
-<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js">  // Temporary placeholder for missing sweepMyCrumbs() function
+  function sweepMyCrumbs() {
+    alert("🧹 Sweeping crumbs feature coming soon!");
+  }
+
+  function investPresale() {
+    alert("Presale functionality not yet implemented.");
+  }
+
+  function openDashboard() {
+    alert("Dashboard coming soon!");
+  }
+</script>
 <script>
+  console.log("App loaded. Checking for MetaMask...");
   let provider, signer, userAddress;
 
-  async function connectWallet(){
-    if(window.ethereum){
-      provider = new ethers.providers.Web3Provider(window.ethereum);
-      await provider.send("eth_requestAccounts",[]);
-      signer = provider.getSigner();
-      userAddress = await signer.getAddress();
-      document.getElementById('walletAddress').innerText="Wallet connected: "+userAddress;
-      await fetchBalances();
+  async function connectWallet() {
+    console.log("Connect Wallet clicked");
+    if (typeof window.ethereum !== 'undefined') {
+      try {
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        signer = provider.getSigner();
+        userAddress = await signer.getAddress();
+        console.log("Connected address:", userAddress);
+        document.getElementById('walletAddress').innerText = "Wallet connected: " + userAddress;
+        await fetchBalances();
+      } catch (err) {
+        console.error("Error connecting to wallet:", err);
+        alert("Something went wrong. Check the console for details.");
+      }
     } else {
-      alert("Please install MetaMask!");
+      console.warn("MetaMask not detected");
+      alert("Please install MetaMask to use this feature: https://metamask.io/download.html");
     }
   }
 
