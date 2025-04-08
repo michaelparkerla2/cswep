@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CSWEP – The Magic✨ Crypto Sweeper (BETA)</title>
-  <script src="https://sdk.twconnect.dev/v1/connect.js"></script>
   <style>
     body { background: #0e0e0e; color: white; font-family: 'Segoe UI', sans-serif; margin:0; padding:0; text-align:center; }
     .main { padding:20px; max-width:600px; margin:auto; }
@@ -35,7 +34,15 @@
     <h2>Free stuck crypto. Convert to cash. No gas!</h2>
     <img src="cswep.logo.png" alt="CSWEP Logo" class="logo">
     <div class="button-row">
-      <button id="connectBtn">Connect Wallet</button>
+      <div style="display: flex; justify-content: center; width: 100%;">
+        <iframe
+          src="https://connect.thirdweb.com/embed?clientId=e4dd72496aecb9110a3ee79f72937428"
+          width="320"
+          height="64"
+          frameborder="0"
+          style="border-radius: 12px; background: transparent;"
+        ></iframe>
+      </div>
       <button onclick="sweepMyCrumbs()">Sweep My Crumbs</button>
       <button onclick="investPresale()">Invest in Presale</button>
       <button onclick="openDashboard()">Open Dashboard</button>
@@ -48,20 +55,5 @@
     </table>
     <p class="footer-msg">We use special technology to magically deliver users a cash-out experience — converting trapped micro balances into CSWEP tokens or stablecoins, no gas required.</p>
   </div>
-
-  <script>
-    window.addEventListener("load", function () {
-      const connectBtn = document.getElementById("connectBtn");
-      connectBtn.addEventListener("click", () => {
-        window.twConnect.setup({
-          clientId: "e4dd72496aecb9110a3ee79f72937428",
-          appName: "CSWEP App",
-          connectModal: { title: "Connect Wallet" },
-          connectButton: { selector: "#connectBtn" }
-        });
-        window.twConnect.open();
-      });
-    });
-  </script>
 </body>
 </html>
