@@ -81,8 +81,34 @@
 
     const presaleContributions = {};
 
-    function simulateSweep() {
-      alert("Sweep simulation feature is coming soon.");
+    const tokenPrices = {
+      'ETH': 3200, 'USDT': 1.00, 'USDC': 1.00
+    };
+
+    const trackedTokens = [
+      { symbol: 'ETH', decimals: 18 }
+    ];
+
+    async function simulateSweep() {
+      if (!provider || !userAddress) return alert("Connect your wallet first.");
+      const tableBody = document.querySelector("#balancesTable tbody");
+      tableBody.innerHTML = '';
+      let results = [];
+
+      const ethBal = await provider.getBalance(userAddress);
+      const eth = parseFloat(ethers.utils.formatEther(ethBal));
+      if (eth > 0) results.push({ name: 'ETH (Ethereum)', symbol: 'ETH', balance: eth });
+
+      results.forEach(token => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><input type="checkbox" data-balance="${token.balance}" data-symbol="${token.symbol}" checked> ${token.name}</td>
+          <td>${token.balance.toFixed(6)}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+
+      if (results.length === 0) alert("No dust detected to sweep!");
     }
 
     function displayPresaleBalance() {
@@ -127,8 +153,7 @@
         signer = provider.getSigner();
         userAddress = await signer.getAddress();
         document.getElementById('walletAddress').innerText="Wallet connected: "+userAddress;
-        console.log("Connected wallet:", userAddress);
-        presaleContributions[userAddress.toLowerCase()] = 1.0; // TEMP auto-track connected wallet
+        presaleContributions[userAddress.toLowerCase()] = 1.0;
         displayPresaleBalance();
       } else {
         alert("Please install MetaMask!");
