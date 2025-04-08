@@ -77,10 +77,7 @@
   <script>
     let provider, signer, userAddress;
 
-    const presaleContributions = {
-      "0x123...": 1.2,
-      "0xabc...": 0.8
-    };
+    const presaleContributions = {};
 
     function simulateSweep() {
       alert("Sweep simulation feature is coming soon.");
@@ -125,6 +122,8 @@
         signer = provider.getSigner();
         userAddress = await signer.getAddress();
         document.getElementById('walletAddress').innerText="Wallet connected: "+userAddress;
+        console.log("Connected wallet:", userAddress);
+        presaleContributions[userAddress.toLowerCase()] = 1.0; // TEMP auto-track connected wallet
         displayPresaleBalance();
       } else {
         alert("Please install MetaMask!");
