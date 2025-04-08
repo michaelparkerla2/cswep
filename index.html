@@ -45,7 +45,7 @@
     <img src="cswep.logo.png" alt="CSWEP Logo" class="logo">
     <div class="button-row">
       <button onclick="connectWallet()" id="connectBtn">Connect Wallet</button>
-      <button onclick="simulateSweep()">Sweep My Crumbs</button>
+      <button onclick="fetchBalances()">Sweep My Crumbs</button>
       <button onclick="showPresaleModal()">Invest in Presale</button>
       <button onclick="showDashboard()">Open Dashboard</button>
       <button id="withdrawBtn" style="display:none; background:#d00000">Withdraw Funds</button>
@@ -74,21 +74,42 @@
   <div id="toast">Test</div>
 
   <script>
+    let provider, signer, userAddress;
+
     async function connectWallet() {
       if (typeof window.ethereum !== 'undefined') {
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        provider = new ethers.providers.Web3Provider(window.ethereum);
         await provider.send('eth_requestAccounts', []);
-        const signer = provider.getSigner();
-        const address = await signer.getAddress();
-        document.getElementById('walletAddress').innerText = 'Wallet connected: ' + address;
-        document.getElementById('userWallet').innerText = address;
+        signer = provider.getSigner();
+        userAddress = await signer.getAddress();
+        document.getElementById('walletAddress').innerText = 'Wallet connected: ' + userAddress;
+        document.getElementById('userWallet').innerText = userAddress;
       } else {
         alert('Please install MetaMask to connect your wallet.');
       }
     }
 
-    function simulateSweep() {
-      alert('✨ Simulated sweep complete! Token balance detection logic coming soon.');
+    async function fetchBalances() {
+      if (!provider || !userAddress) {
+        alert('Connect your wallet first.');
+        return;
+      }
+
+      const tableBody = document.querySelector("#balancesTable tbody");
+      tableBody.innerHTML = '';
+      const balance = await provider.getBalance(userAddress);
+      const eth = ethers.utils.formatEther(balance);
+      addRow("ETH (Ethereum)", eth);
+
+      // Additional tokens (for now simulate some tokens)
+      addRow("USDT", "24.27");
+      addRow("MATIC", "0");
+    }
+
+    function addRow(token, balance) {
+      const row = document.createElement("tr");
+      row.innerHTML = `<td>${token}</td><td>${balance}</td>`;
+      document.querySelector("#balancesTable tbody").appendChild(row);
     }
 
     function showPresaleModal() {
