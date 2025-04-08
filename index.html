@@ -37,8 +37,18 @@
     <div class="button-row">
       <button onclick="connectWallet()" id="connectBtn">Connect Wallet</button>
       <button onclick="simulateSweep()">Sweep My Crumbs</button>
+      <button onclick="showPresaleModal()">Invest in Presale</button>
     </div>
     <div class="banner">🔒 Powered by 2 Patent-Pending Web3 Technologies</div>
+    <div id="presaleModal" class="modal">
+      <div class="modal-content">
+        <span class="close-btn" onclick="hidePresaleModal()">&times;</span>
+        <h3>Invest in CSWEP Presale</h3>
+        <p>Support the future of gas-free dust sweeping! Send ETH or USDT to our treasury wallet:</p>
+        <code>0xYourTreasuryWalletAddressHere</code>
+        <p>You’ll receive CSWEP tokens based on your contribution. Balance tracking and token claims coming soon.</p>
+      </div>
+    </div>
     <div id="walletAddress"></div>
     <table id="balancesTable">
       <thead><tr><th>Token</th><th>Your Balance</th></tr></thead>
@@ -159,6 +169,13 @@
 BETA TEST VERSION!
 No Balances Swept. Launch Coming Soon!`;
       alert(message);
+    }
+
+    function showPresaleModal() {
+      document.getElementById('presaleModal').style.display = 'block';
+    }
+    function hidePresaleModal() {
+      document.getElementById('presaleModal').style.display = 'none';
     }
   </script>
 </body>
