@@ -48,20 +48,18 @@
     <p class="footer-msg">We use special technology to magically deliver users a cash-out experience — converting trapped micro balances into CSWEP tokens or stablecoins, no gas required.</p>
   </div>
 
-<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js">  // Temporary placeholder for missing sweepMyCrumbs() function
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+<script>
   function sweepMyCrumbs() {
     alert("🧹 Sweeping crumbs feature coming soon!");
   }
-
   function investPresale() {
     alert("Presale functionality not yet implemented.");
   }
-
   function openDashboard() {
     alert("Dashboard coming soon!");
   }
-</script>
-<script>
+
   console.log("App loaded. Checking for MetaMask...");
   let provider, signer, userAddress;
 
@@ -86,15 +84,46 @@
     }
   }
 
-  async function fetchBalances(){
+  async function fetchBalances() {
     const tableBody = document.querySelector("#balancesTable tbody");
     tableBody.innerHTML = '';
+
     const ethBal = await provider.getBalance(userAddress);
     const ethBalance = parseFloat(ethers.utils.formatEther(ethBal));
 
-    const row = document.createElement('tr');
-    row.innerHTML = `<td>ETH</td><td>${ethBalance.toFixed(4)}</td>`;
-    tableBody.appendChild(row);
+    const tokens = [
+      { name: 'ETH (Ethereum)', symbol: 'ETH', decimals: 18 },
+      { name: 'USDT', symbol: 'USDT', address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', decimals: 6 },
+      { name: 'USDC', symbol: 'USDC', address: '0xA0b86991C6218B36c1D19D4a2e9Eb0cE3606eB48', decimals: 6 },
+      { name: 'DAI', symbol: 'DAI', address: '0x6B175474E89094C44Da98b954EedeAC495271d0F', decimals: 18 },
+      { name: 'SHIBA', symbol: 'SHIBA', address: '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE', decimals: 18 },
+      { name: 'MATIC', symbol: 'MATIC', address: '0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0', decimals: 18 },
+      { name: 'LINK', symbol: 'LINK', address: '0x514910771AF9Ca656af840dff83E8264EcF986CA', decimals: 18 },
+      { name: 'ARB', symbol: 'ARB', address: '0x912CE59144191C1204E64559FE8253a0e49E6548', decimals: 18 },
+      { name: 'CRV', symbol: 'CRV', address: '0xD533a949740bb3306d119CC777fa900bA034cd52', decimals: 18 },
+      { name: 'UNI', symbol: 'UNI', address: '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984', decimals: 18 }
+    ];
+
+    const ethRow = document.createElement('tr');
+    ethRow.innerHTML = `<td><input type="checkbox" checked data-symbol="ETH" data-balance="${ethBalance.toFixed(6)}"> ETH</td><td>${ethBalance.toFixed(4)}</td>`;
+    tableBody.appendChild(ethRow);
+
+    const erc20Abi = ["function balanceOf(address) view returns (uint256)"];
+    for (let token of tokens.slice(1)) {
+      let balance = 0;
+      try {
+        const contract = new ethers.Contract(token.address, erc20Abi, provider);
+        const raw = await contract.balanceOf(userAddress);
+        balance = parseFloat(ethers.utils.formatUnits(raw, token.decimals));
+      } catch (err) {
+        console.warn(`Could not fetch ${token.symbol}:`, err);
+      }
+      const row = document.createElement('tr');
+      const isDisabled = balance === 0;
+      row.className = isDisabled ? 'disabled-row' : '';
+      row.innerHTML = `<td><input type="checkbox" ${isDisabled ? 'disabled' : 'checked'} data-symbol="${token.symbol}" data-balance="${balance.toFixed(6)}"> ${token.symbol}</td><td>${balance.toFixed(4)}</td>`;
+      tableBody.appendChild(row);
+    }
   }
 </script>
 </body>
