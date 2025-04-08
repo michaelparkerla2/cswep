@@ -28,9 +28,11 @@
     .footer-msg { color:#aaa; font-size: 0.9rem; margin-top:30px; }
     input[type="checkbox"] { margin-right:10px; }
     .modal { display: none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.7); }
-    .modal-content { background-color: #1e1e1e; margin: 15% auto; padding: 20px; border: 1px solid #444; width: 90%; max-width: 400px; border-radius: 10px; color: #fff; }
-    .close-btn { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
-    .close-btn:hover, .close-btn:focus { color: #fff; text-decoration: none; cursor: pointer; }
+    .modal-content { background: linear-gradient(145deg, #1a1a1a, #121212); box-shadow: 0 0 20px #0a65ff55; color: #fff; border: 1px solid #333; border-radius: 12px; padding: 30px; max-width: 480px; margin: 10% auto; position: relative; font-size: 1rem; }
+    .modal-content h3 { font-size: 1.5rem; color: #0a65ff; margin-bottom: 10px; }
+    .modal-content code { background: #222; padding: 4px 8px; border-radius: 5px; font-size: 0.95rem; }
+    .close-btn { position: absolute; top: 10px; right: 15px; font-size: 26px; color: #aaa; cursor: pointer; }
+    .close-btn:hover { color: white; }
     .presale-balance { margin-top: 10px; color: #0a65ff; font-weight: bold; font-size: 1rem; }
   </style>
 </head>
@@ -103,7 +105,10 @@
     }
 
     function showDashboard() {
-      if (!userAddress) return;
+      if (!userAddress) {
+        alert("Please connect your wallet first.");
+        return;
+      }
       const lower = userAddress.toLowerCase();
       const balance = presaleContributions[lower] || 0;
       document.getElementById('dashboardWallet').innerText = userAddress;
