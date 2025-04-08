@@ -27,18 +27,6 @@
     .disabled-row { color:#666; opacity:0.6; }
     .footer-msg { color:#aaa; font-size: 0.9rem; margin-top:30px; }
     input[type="checkbox"] { margin-right:10px; }
-    .modal { display: none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.7); }
-    .modal-content { background: linear-gradient(145deg, #1a1a1a, #121212); box-shadow: 0 0 20px #0a65ff55; color: #fff; border: 1px solid #333; border-radius: 12px; padding: 30px; max-width: 480px; margin: 10% auto; position: relative; font-size: 1rem; }
-    .modal-content h3 { font-size: 1.5rem; color: #0a65ff; margin-bottom: 10px; }
-    .modal-content code { background: #222; padding: 4px 8px; border-radius: 5px; font-size: 0.95rem; }
-    .close-btn { position: absolute; top: 10px; right: 15px; font-size: 26px; color: #aaa; cursor: pointer; }
-    .close-btn:hover { color: white; }
-    .presale-balance { margin-top: 10px; color: #0a65ff; font-weight: bold; font-size: 1rem; }
-    #toast { visibility: hidden; min-width: 200px; background-color: #0a65ff; color: white; text-align: center; border-radius: 8px; padding: 16px; position: fixed; z-index: 1000; bottom: 30px; left: 50%; transform: translateX(-50%); transition: visibility 0s, opacity 0.5s linear; opacity: 0; }
-    #toast.show { visibility: visible; opacity: 1; }
-    #dashboardModal .modal-content { text-align:left; font-size: 1rem; }
-    .progress-bar-container { background: #333; border-radius: 10px; height: 16px; width: 100%; margin: 10px 0; }
-    .progress-bar { height: 100%; border-radius: 10px; background: #0a65ff; width: 0%; }
   </style>
 </head>
 <body>
@@ -76,60 +64,57 @@
     ];
 
     async function connectWallet() {
-      if (window.ethereum) {
+      try {
+        if (!window.ethereum) return alert("Please install MetaMask.");
         provider = new ethers.providers.Web3Provider(window.ethereum);
         await provider.send("eth_requestAccounts", []);
         signer = provider.getSigner();
         userAddress = await signer.getAddress();
-        document.getElementById('walletAddress').innerText = "Wallet connected: " + userAddress;
+        document.getElementById("walletAddress").innerText = `Wallet connected: ${userAddress}`;
         fetchBalances();
-      } else {
-        alert("Please install MetaMask to connect your wallet.");
+      } catch (err) {
+        console.error("Wallet connection failed:", err);
       }
     }
 
     async function fetchBalances() {
-      if (!provider || !userAddress) {
-        alert('Connect your wallet first.');
-        return;
-      }
+      if (!provider || !userAddress) return;
       const tableBody = document.querySelector("#balancesTable tbody");
       tableBody.innerHTML = '';
 
       const ethBal = await provider.getBalance(userAddress);
-      const ethBalance = parseFloat(ethers.utils.formatEther(ethBal));
-      addRow("ETH (Ethereum)", ethBalance.toFixed(6));
+      addRow("ETH (Ethereum)", parseFloat(ethers.utils.formatEther(ethBal)).toFixed(6));
 
       const abi = ["function balanceOf(address) view returns (uint256)"];
       for (let i = 1; i < tokens.length; i++) {
-        const token = tokens[i];
+        const t = tokens[i];
         try {
-          const contract = new ethers.Contract(token.address, abi, provider);
-          const bal = await contract.balanceOf(userAddress);
-          const human = parseFloat(ethers.utils.formatUnits(bal, token.decimals));
-          if (human > 0) addRow(token.name, human.toFixed(6));
+          const c = new ethers.Contract(t.address, abi, provider);
+          const b = await c.balanceOf(userAddress);
+          const human = parseFloat(ethers.utils.formatUnits(b, t.decimals));
+          if (human > 0) addRow(t.name, human.toFixed(6));
         } catch (err) {
-          console.warn("Error fetching token", token.symbol);
+          console.warn(`Skipping ${t.symbol}`);
         }
       }
     }
 
-    function addRow(tokenName, balance) {
-      const row = document.createElement('tr');
-      row.innerHTML = `<td>${tokenName}</td><td>${balance}</td>`;
+    function addRow(name, balance) {
+      const row = document.createElement("tr");
+      row.innerHTML = `<td>${name}</td><td>${balance}</td>`;
       document.querySelector("#balancesTable tbody").appendChild(row);
     }
 
     function simulateSweep() {
-      alert("✨ Simulated sweep complete! Token balance detection logic coming soon.");
+      alert("✨ Simulated sweep complete! Token balance detection logic coming back.");
     }
 
     function showPresaleModal() {
-      alert("Presale modal triggered. (UI under development)");
+      alert("Presale modal triggered. Contract: 0x0b782AA2f054cF6C642467FdF8fD01e36FfC6221\n1 ETH = 10,000 CSWEP\n\nYour wallet will be credited and tracked. UI update coming soon.");
     }
 
     function openDashboard() {
-      alert("Dashboard coming soon: contribution tracking, token estimate, and phase info.");
+      alert("Dashboard view is temporarily under construction.\n\nConnect wallet, view live ETH + USDT contributions, estimated CSWEP tokens, and presale progress coming back soon!");
     }
   </script>
 </body>
