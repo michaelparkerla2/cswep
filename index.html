@@ -34,6 +34,8 @@
     .close-btn { position: absolute; top: 10px; right: 15px; font-size: 26px; color: #aaa; cursor: pointer; }
     .close-btn:hover { color: white; }
     .presale-balance { margin-top: 10px; color: #0a65ff; font-weight: bold; font-size: 1rem; }
+    #toast { visibility: hidden; min-width: 200px; background-color: #0a65ff; color: white; text-align: center; border-radius: 8px; padding: 16px; position: fixed; z-index: 1000; bottom: 30px; left: 50%; transform: translateX(-50%); transition: visibility 0s, opacity 0.5s linear; opacity: 0; }
+    #toast.show { visibility: visible; opacity: 1; }
   </style>
 </head>
 <body>
@@ -46,28 +48,37 @@
       <button onclick="simulateSweep()">Sweep My Crumbs</button>
       <button onclick="showPresaleModal()">Invest in Presale</button>
       <button onclick="showDashboard()">Open Dashboard</button>
+      <button id="withdrawBtn" style="display:none; background:#d00000">Withdraw Funds</button>
     </div>
     <div class="banner">🔐 Powered by 2 Patent-Pending Web3 Technologies</div>
+
     <div id="presaleModal" class="modal">
       <div class="modal-content">
         <span class="close-btn" onclick="hidePresaleModal()">&times;</span>
         <h3>Invest in CSWEP Presale</h3>
-        <p>Support the future of gas-free dust sweeping! Send ETH to our presale contract:</p>
+        <p>You're early — and that's powerful.</p>
+        <p>Send ETH directly to our official presale contract:</p>
         <code id="presaleContractAddress">0x0b782AA2f054cF6C642467FdF8fD01e36FfC6221</code>
-        <p>You’ll receive CSWEP tokens based on your contribution.</p>
-        <p><strong>Wallets are being tracked in real-time.</strong> Token claims will be enabled soon via your dashboard.</p>
-        <p id="presaleBalance" class="presale-balance"></p>
+        <p>Your contribution is securely recorded on-chain.</p>
+        <p><strong>You will be able to claim CSWEP tokens after presale ends based on your contribution amount.</strong></p>
+        <p><strong>Rate:</strong> 1 ETH = 100,000 CSWEP tokens</p>
+        <p id="presaleBalance" class="presale-balance">Fetching your contribution...</p>
       </div>
     </div>
+
     <div id="dashboard" class="modal">
       <div class="modal-content">
         <span class="close-btn" onclick="hideDashboard()">&times;</span>
         <h3>My CSWEP Dashboard</h3>
         <p><strong>Wallet:</strong> <span id="dashboardWallet"></span></p>
         <p><strong>Total Contribution:</strong> <span id="dashboardContribution"></span></p>
+        <p><strong>Estimated Tokens:</strong> <span id="dashboardTokens"></span></p>
         <p><strong>Claim Status:</strong> Coming soon</p>
       </div>
     </div>
+
+    <div id="toast"></div>
+
     <div id="walletAddress"></div>
     <table id="balancesTable">
       <thead><tr><th>Token</th><th>Your Balance</th></tr></thead>
@@ -77,78 +88,64 @@
   </div>
 
   <script>
-    let provider, signer, userAddress;
-    const tokenRate = 10000;
+    const presaleAddress = "0x0b782AA2f054cF6C642467FdF8fD01e36FfC6221";
+    const presaleABI = ["function getContribution(address) view returns (uint256)"];
+    const TOKEN_RATE = 100000; // 100,000 CSWEP per 1 ETH
 
-    const presaleContractAddress = "0x0b782AA2f054cF6C642467FdF8fD01e36FfC6221";
-    const presaleAbi = ["function getContribution(address wallet) external view returns (uint256)"];
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.innerText = message;
+      toast.className = "show";
+      setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+    }
 
-    async function fetchPresaleContribution() {
-      if (!provider || !userAddress) return;
+    async function showPresaleModal() {
+      document.getElementById("presaleModal").style.display = "block";
+      if (!window.ethereum) return;
       try {
-        const contract = new ethers.Contract(presaleContractAddress, presaleAbi, provider);
-        const raw = await contract.getContribution(userAddress);
-        const eth = parseFloat(ethers.utils.formatEther(raw));
-        return eth;
-      } catch (e) {
-        console.error("Presale contract error:", e);
-        return 0;
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        const userAddress = await signer.getAddress();
+        const contract = new ethers.Contract(presaleAddress, presaleABI, provider);
+        const contribution = await contract.getContribution(userAddress);
+        const ethValue = ethers.utils.formatEther(contribution);
+        const tokenEstimate = parseFloat(ethValue) * TOKEN_RATE;
+        document.getElementById("presaleBalance").innerText = `📬 You’ve contributed ${ethValue} ETH\nEstimated tokens: ${tokenEstimate.toLocaleString()} CSWEP`;
+        showToast("Your contribution was fetched successfully!");
+      } catch (err) {
+        document.getElementById("presaleBalance").innerText = "📬 No contribution recorded yet for this wallet.";
+        showToast("No contribution found or wallet not connected.");
       }
-    }
-
-    async function connectWallet(){
-      if(window.ethereum){
-        provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts",[]);
-        signer = provider.getSigner();
-        userAddress = await signer.getAddress();
-        document.getElementById('walletAddress').innerText="Wallet connected: "+userAddress;
-        updateDashboard();
-        displayPresaleBalance();
-      } else {
-        alert("Please install MetaMask!");
-      }
-    }
-
-    async function displayPresaleBalance() {
-      const eth = await fetchPresaleContribution();
-      const tokens = (eth * tokenRate).toFixed(0);
-      const text = eth > 0
-        ? `📊 Your presale contribution: ${eth.toFixed(4)} ETH\n🎁 Estimated CSWEP: ${tokens} tokens`
-        : `📬 No contribution recorded yet for this wallet.`;
-      document.getElementById('presaleBalance').innerText = text;
-    }
-
-    async function updateDashboard() {
-      const eth = await fetchPresaleContribution();
-      const tokens = (eth * tokenRate).toFixed(0);
-      document.getElementById('dashboardWallet').innerText = userAddress;
-      document.getElementById('dashboardContribution').innerHTML = `
-        ${eth.toFixed(4)} ETH<br>
-        🎁 Estimated CSWEP: ${tokens} tokens
-      `;
-    }
-
-    function showPresaleModal() {
-      document.getElementById('presaleModal').style.display = 'block';
-      displayPresaleBalance();
     }
 
     function hidePresaleModal() {
-      document.getElementById('presaleModal').style.display = 'none';
+      document.getElementById("presaleModal").style.display = "none";
     }
 
-    function showDashboard() {
-      if (!userAddress) {
-        alert("Please connect your wallet first.");
-        return;
+    async function showDashboard() {
+      document.getElementById("dashboard").style.display = "block";
+      if (!window.ethereum) return;
+      try {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        const userAddress = await signer.getAddress();
+        document.getElementById("dashboardWallet").innerText = userAddress;
+        const contract = new ethers.Contract(presaleAddress, presaleABI, provider);
+        const contribution = await contract.getContribution(userAddress);
+        const ethValue = ethers.utils.formatEther(contribution);
+        const tokenEstimate = parseFloat(ethValue) * TOKEN_RATE;
+        document.getElementById("dashboardContribution").innerText = `${ethValue} ETH`;
+        document.getElementById("dashboardTokens").innerText = `${tokenEstimate.toLocaleString()} CSWEP`;
+        showToast("Dashboard loaded.");
+      } catch (err) {
+        document.getElementById("dashboardContribution").innerText = "0 ETH";
+        document.getElementById("dashboardTokens").innerText = "0 CSWEP";
+        showToast("Could not load dashboard.");
       }
-      document.getElementById('dashboard').style.display = 'block';
-      updateDashboard();
     }
 
     function hideDashboard() {
-      document.getElementById('dashboard').style.display = 'none';
+      document.getElementById("dashboard").style.display = "none";
     }
   </script>
 </body>
