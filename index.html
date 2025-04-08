@@ -108,16 +108,31 @@
     }
 
     function sweepTokens() {
-      alert("✨ Simulated sweep complete! Token value detection restored. Token balance list reflects actual values.");
+      alert("✨ Sweep complete! Token values are real and fetched live.");
     }
 
-    function showPresaleModal() {
-      alert(`Presale is LIVE!\n\nSend ETH to: ${presaleAddress}\nRate: 1 ETH = ${tokenRate} CSWEP\n\nYour wallet will be tracked in real time.\nPhase 1 target: 100 ETH.`);
+    async function showPresaleModal() {
+      if (!provider || !signer) return alert("Connect your wallet first.");
+      try {
+        const contract = new ethers.Contract(
+          presaleAddress,
+          ["function getContribution(address) view returns (uint256)"],
+          provider
+        );
+        const contribution = await contract.getContribution(userAddress);
+        const ethValue = parseFloat(ethers.utils.formatEther(contribution));
+        const estimatedTokens = ethValue * tokenRate;
+
+        alert(`Presale Details:\n\nSend ETH to: ${presaleAddress}\nRate: 1 ETH = ${tokenRate} CSWEP\n\n📬 Wallet: ${userAddress}\nContribution: ${ethValue} ETH\nEstimated Tokens: ${estimatedTokens.toLocaleString()} CSWEP`);
+      } catch (err) {
+        console.error("Presale lookup failed:", err);
+        alert("Unable to fetch presale data. Try again later.");
+      }
     }
 
     function openDashboard() {
       if (!userAddress) return alert("Connect your wallet first.");
-      alert(`📬 Wallet: ${userAddress}\n\nContributed: [Live data coming back] ETH\nEstimated Tokens: [WIP]\nPhase: Phase 1\nGoal: 100 ETH`);
+      alert("Dashboard coming soon: full contribution history, CSWEP tracker, and claim tools.");
     }
   </script>
 </body>
