@@ -50,13 +50,11 @@
 
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.7.8/dist/umd/index.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.7.8/dist/umd/index.min.js"></script>
 <script src="https://unpkg.com/web3modal@1.9.12/dist/index.js"></script>
 <script>
   let provider, signer, userAddress;
 
-  document.getElementById("connectBtn").addEventListener("click", async function () {
+  async function connectWallet() {
     const providerOptions = {
       walletconnect: {
         package: window.WalletConnectProvider.default,
@@ -87,7 +85,10 @@
       console.error("Wallet connection failed", err);
       alert("Wallet connection failed: " + (err.message || "Unknown error"));
     }
-  });
+  }
+
+  document.getElementById("connectBtn").addEventListener("click", connectWallet);
 </script>
 </body>
 </html>
+
