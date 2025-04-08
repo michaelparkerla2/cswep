@@ -52,8 +52,8 @@
       <div class="modal-content">
         <span class="close-btn" onclick="hidePresaleModal()">&times;</span>
         <h3>Invest in CSWEP Presale</h3>
-        <p>Support the future of gas-free dust sweeping! Send ETH or USDT to our treasury wallet:</p>
-        <code>0xYourTreasuryWalletAddressHere</code>
+        <p>Support the future of gas-free dust sweeping! Send ETH to our presale contract:</p>
+        <code id="presaleContractAddress">0x0b782AA2f054cF6C642467FdF8fD01e36FfC6221</code>
         <p>You’ll receive CSWEP tokens based on your contribution.</p>
         <p><strong>Wallets are being tracked in real-time.</strong> Token claims will be enabled soon via your dashboard.</p>
         <p id="presaleBalance" class="presale-balance"></p>
@@ -64,7 +64,7 @@
         <span class="close-btn" onclick="hideDashboard()">&times;</span>
         <h3>My CSWEP Dashboard</h3>
         <p><strong>Wallet:</strong> <span id="dashboardWallet"></span></p>
-        <p><strong>Total Contribution:</strong> <span id="dashboardContribution"></span> ETH</p>
+        <p><strong>Total Contribution:</strong> <span id="dashboardContribution"></span></p>
         <p><strong>Claim Status:</strong> Coming soon</p>
       </div>
     </div>
@@ -78,84 +78,55 @@
 
   <script>
     let provider, signer, userAddress;
+    const tokenRate = 10000;
 
-    const presaleContributions = {};
+    const presaleContractAddress = "0x0b782AA2f054cF6C642467FdF8fD01e36FfC6221";
+    const presaleAbi = ["function getContribution(address wallet) external view returns (uint256)"];
 
-    const tokenPrices = {
-      'ETH': 3200, 'USDT': 1.00, 'USDC': 1.00, 'DAI': 1.00, 'SHIBA': 0.000025, 'MATIC': 0.90, 'LINK': 13.50,
-      'ARB': 1.50, 'CRV': 0.60, 'UNI': 6.50, 'AAVE': 85.00, 'COMP': 45.00, 'GRT': 0.30, 'MKR': 3050,
-      '1INCH': 0.40, 'ENS': 15.00, 'BAT': 0.25, 'SNX': 2.20, 'YFI': 6400, 'LDO': 2.10, 'REN': 0.12,
-      'BAL': 4.10, 'ZRX': 0.35
-    };
-
-    const trackedTokens = [
-      { name: 'ETH (Ethereum)', symbol: 'ETH', decimals: 18 },
-      { name: 'USDT', symbol: 'USDT', address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', decimals: 6 },
-      { name: 'USDC', symbol: 'USDC', address: '0xA0b86991C6218B36c1D19D4a2e9Eb0cE3606eB48', decimals: 6 },
-      { name: 'DAI', symbol: 'DAI', address: '0x6B175474E89094C44Da98b954EedeAC495271d0F', decimals: 18 },
-      { name: 'SHIBA', symbol: 'SHIBA', address: '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE', decimals: 18 },
-      { name: 'MATIC', symbol: 'MATIC', address: '0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0', decimals: 18 },
-      { name: 'LINK', symbol: 'LINK', address: '0x514910771AF9Ca656af840dff83E8264EcF986CA', decimals: 18 },
-      { name: 'ARB', symbol: 'ARB', address: '0x912CE59144191C1204E64559FE8253a0e49E6548', decimals: 18 },
-      { name: 'CRV', symbol: 'CRV', address: '0xD533a949740bb3306d119CC777fa900bA034cd52', decimals: 18 },
-      { name: 'UNI', symbol: 'UNI', address: '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984', decimals: 18 },
-      { name: 'AAVE', symbol: 'AAVE', address: '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9', decimals: 18 },
-      { name: 'COMP', symbol: 'COMP', address: '0xc00e94cb662c3520282e6f5717214004a7f26888', decimals: 18 },
-      { name: 'GRT', symbol: 'GRT', address: '0xc944E90C64B2c07662A292be6244BDf05Cda44a7', decimals: 18 },
-      { name: 'MKR', symbol: 'MKR', address: '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2', decimals: 18 },
-      { name: '1INCH', symbol: '1INCH', address: '0x111111111117dc0aa78b770fa6a738034120c302', decimals: 18 },
-      { name: 'ENS', symbol: 'ENS', address: '0xcEb5dD7f91366f34cfdB73A82D05C76ECAB1B03E', decimals: 18 },
-      { name: 'BAT', symbol: 'BAT', address: '0x0D8775F648430679A709E98d2b0Cb6250d2887EF', decimals: 18 },
-      { name: 'SNX', symbol: 'SNX', address: '0xC011A72400E58ecD99Ee497CF89E3775d4bd732F', decimals: 18 },
-      { name: 'YFI', symbol: 'YFI', address: '0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e', decimals: 18 },
-      { name: 'LDO', symbol: 'LDO', address: '0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32', decimals: 18 },
-      { name: 'REN', symbol: 'REN', address: '0x408e41876cCCDC0F92210600ef50372656052a38', decimals: 18 },
-      { name: 'BAL', symbol: 'BAL', address: '0xba100000625a3754423978a60c9317c58a424e3D', decimals: 18 },
-      { name: 'ZRX', symbol: 'ZRX', address: '0xE41d2489571d322189246DaFA5ebDe1F4699F498', decimals: 18 }
-    ];
-
-    async function simulateSweep() {
-      if (!provider || !userAddress) return alert("Connect your wallet first.");
-      const tableBody = document.querySelector("#balancesTable tbody");
-      tableBody.innerHTML = '';
-      let results = [];
-
-      const ethBal = await provider.getBalance(userAddress);
-      const eth = parseFloat(ethers.utils.formatEther(ethBal));
-      if (eth > 0) results.push({ name: 'ETH (Ethereum)', symbol: 'ETH', balance: eth });
-
-      const erc20Abi = ["function balanceOf(address) view returns (uint256)"];
-      for (const token of trackedTokens.slice(1)) {
-        try {
-          const contract = new ethers.Contract(token.address, erc20Abi, provider);
-          const raw = await contract.balanceOf(userAddress);
-          const balance = parseFloat(ethers.utils.formatUnits(raw, token.decimals));
-          if (balance > 0) results.push({ name: token.name, symbol: token.symbol, balance });
-        } catch (e) {
-          console.error(`Error fetching ${token.symbol}:`, e);
-        }
+    async function fetchPresaleContribution() {
+      if (!provider || !userAddress) return;
+      try {
+        const contract = new ethers.Contract(presaleContractAddress, presaleAbi, provider);
+        const raw = await contract.getContribution(userAddress);
+        const eth = parseFloat(ethers.utils.formatEther(raw));
+        return eth;
+      } catch (e) {
+        console.error("Presale contract error:", e);
+        return 0;
       }
-
-      results.forEach(token => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td><input type="checkbox" data-balance="${token.balance}" data-symbol="${token.symbol}" checked> ${token.name}</td>
-          <td>${token.balance.toFixed(6)}</td>
-        `;
-        tableBody.appendChild(row);
-      });
-
-      if (results.length === 0) alert("No dust detected to sweep!");
     }
 
-    function displayPresaleBalance() {
-      if (!userAddress) return;
-      const lower = userAddress.toLowerCase();
-      const balance = presaleContributions[lower] || 0;
-      const text = balance > 0
-        ? `📊 Your presale contribution: ${balance} ETH`
+    async function connectWallet(){
+      if(window.ethereum){
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("eth_requestAccounts",[]);
+        signer = provider.getSigner();
+        userAddress = await signer.getAddress();
+        document.getElementById('walletAddress').innerText="Wallet connected: "+userAddress;
+        updateDashboard();
+        displayPresaleBalance();
+      } else {
+        alert("Please install MetaMask!");
+      }
+    }
+
+    async function displayPresaleBalance() {
+      const eth = await fetchPresaleContribution();
+      const tokens = (eth * tokenRate).toFixed(0);
+      const text = eth > 0
+        ? `📊 Your presale contribution: ${eth.toFixed(4)} ETH\n🎁 Estimated CSWEP: ${tokens} tokens`
         : `📬 No contribution recorded yet for this wallet.`;
       document.getElementById('presaleBalance').innerText = text;
+    }
+
+    async function updateDashboard() {
+      const eth = await fetchPresaleContribution();
+      const tokens = (eth * tokenRate).toFixed(0);
+      document.getElementById('dashboardWallet').innerText = userAddress;
+      document.getElementById('dashboardContribution').innerHTML = `
+        ${eth.toFixed(4)} ETH<br>
+        🎁 Estimated CSWEP: ${tokens} tokens
+      `;
     }
 
     function showPresaleModal() {
@@ -172,29 +143,12 @@
         alert("Please connect your wallet first.");
         return;
       }
-      const lower = userAddress.toLowerCase();
-      const balance = presaleContributions[lower] || 0;
-      document.getElementById('dashboardWallet').innerText = userAddress;
-      document.getElementById('dashboardContribution').innerText = balance;
       document.getElementById('dashboard').style.display = 'block';
+      updateDashboard();
     }
 
     function hideDashboard() {
       document.getElementById('dashboard').style.display = 'none';
-    }
-
-    async function connectWallet(){
-      if(window.ethereum){
-        provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts",[]);
-        signer = provider.getSigner();
-        userAddress = await signer.getAddress();
-        document.getElementById('walletAddress').innerText="Wallet connected: "+userAddress;
-        presaleContributions[userAddress.toLowerCase()] = 1.0;
-        displayPresaleBalance();
-      } else {
-        alert("Please install MetaMask!");
-      }
     }
   </script>
 </body>
