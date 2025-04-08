@@ -57,7 +57,11 @@
     <div id="walletAddress"></div>
     <table id="balancesTable">
       <thead><tr><th>Token</th><th>Your Balance</th></tr></thead>
-      <tbody></tbody>
+      <tbody>
+        <tr><td><input type="checkbox" checked> ETH (Ethereum)</td><td>0.015</td></tr>
+        <tr><td><input type="checkbox" checked> USDT</td><td>24.27</td></tr>
+        <tr><td><input type="checkbox" disabled> MATIC</td><td>0</td></tr>
+      </tbody>
     </table>
     <p class="footer-msg">We use special technology to magically deliver users a cash-out experience — converting trapped micro balances into CSWEP tokens or stablecoins, no gas required.</p>
   </div>
@@ -76,12 +80,18 @@
     }
 
     function simulateSweep() {
-      const table = document.getElementById("balancesTable").getElementsByTagName('tbody')[0];
-      if (!table || table.rows.length === 0) {
+      const rows = document.querySelectorAll("#balancesTable tbody tr");
+      if (!rows.length) {
         alert("No token balances detected to sweep yet. Connect your wallet and try again.");
         return;
       }
-      alert("Simulated sweep initiated for detected balances. (Real logic coming soon.)");
+      const selected = Array.from(rows).filter(row => row.querySelector("input[type='checkbox']")?.checked);
+      if (!selected.length) {
+        alert("No token balances selected to sweep.");
+        return;
+      }
+      const swept = selected.map(row => row.cells[0].innerText.trim()).join(", ");
+      alert(`✨ Simulated sweep complete! Tokens: ${swept}`);
     }
 
     function showPresaleModal() {
