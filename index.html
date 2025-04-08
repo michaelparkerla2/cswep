@@ -36,6 +36,9 @@
     .presale-balance { margin-top: 10px; color: #0a65ff; font-weight: bold; font-size: 1rem; }
     #toast { visibility: hidden; min-width: 200px; background-color: #0a65ff; color: white; text-align: center; border-radius: 8px; padding: 16px; position: fixed; z-index: 1000; bottom: 30px; left: 50%; transform: translateX(-50%); transition: visibility 0s, opacity 0.5s linear; opacity: 0; }
     #toast.show { visibility: visible; opacity: 1; }
+    #dashboardModal .modal-content { text-align:left; font-size: 1rem; }
+    .progress-bar-container { background: #333; border-radius: 10px; height: 16px; width: 100%; margin: 10px 0; }
+    .progress-bar { height: 100%; border-radius: 10px; background: #0a65ff; width: 0%; }
   </style>
 </head>
 <body>
@@ -71,22 +74,69 @@
     </div>
   </div>
 
+  <div id="dashboardModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="document.getElementById('dashboardModal').style.display='none'">&times;</span>
+      <h3>📊 CSWEP Dashboard – Phase 1</h3>
+      <p><strong>Wallet:</strong> <span id="dashWallet">-</span></p>
+      <p><strong>Contributed:</strong> <span id="dashContribution">0</span> ETH</p>
+      <p><strong>Estimated Tokens:</strong> <span id="dashTokens">0</span> CSWEP</p>
+      <p><strong>Total Raised:</strong> <span id="totalRaised">0</span> ETH</p>
+      <div class="progress-bar-container">
+        <div id="progressBar" class="progress-bar"></div>
+      </div>
+    </div>
+  </div>
+
   <div id="toast">Test</div>
 
   <script>
-    let provider, signer, userAddress;
+    const presaleAddress = "0x0b782AA2f054cF6C642467FdF8fD01e36FfC6221";
+    const presaleABI = [
+      "function getContribution(address) view returns (uint256)",
+      "function contributions(address) view returns (uint256)",
+      "function owner() view returns (address)",
+      "function withdraw()",
+      "receive() external payable"
+    ];
+
+    let provider, signer, userAddress, contract;
 
     async function connectWallet() {
-      if (typeof window.ethereum !== 'undefined') {
+      if (window.ethereum) {
         provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send('eth_requestAccounts', []);
+        await provider.send("eth_requestAccounts", []);
         signer = provider.getSigner();
         userAddress = await signer.getAddress();
-        document.getElementById('walletAddress').innerText = 'Wallet connected: ' + userAddress;
-        document.getElementById('userWallet').innerText = userAddress;
+        document.getElementById("walletAddress").innerText = "Wallet connected: " + userAddress;
+        document.getElementById("userWallet").innerText = userAddress;
+        document.getElementById("dashWallet").innerText = userAddress;
+        contract = new ethers.Contract(presaleAddress, presaleABI, provider);
       } else {
-        alert('Please install MetaMask to connect your wallet.');
+        alert("Please install MetaMask to connect your wallet.");
       }
+    }
+
+    async function showDashboard() {
+      if (!provider || !userAddress || !contract) {
+        alert("Connect your wallet first.");
+        return;
+      }
+      const contrib = await contract.getContribution(userAddress);
+      const ethVal = parseFloat(ethers.utils.formatEther(contrib));
+      const estimated = ethVal * 10000;
+      document.getElementById("dashContribution").innerText = ethVal.toFixed(4);
+      document.getElementById("dashTokens").innerText = estimated.toLocaleString();
+      document.getElementById("dashWallet").innerText = userAddress;
+
+      const total = await provider.getBalance(presaleAddress);
+      const totalEth = parseFloat(ethers.utils.formatEther(total));
+      document.getElementById("totalRaised").innerText = totalEth.toFixed(2);
+
+      const progress = Math.min((totalEth / 100) * 100, 100);
+      document.getElementById("progressBar").style.width = `${progress}%`;
+
+      document.getElementById("dashboardModal").style.display = "block";
     }
 
     async function fetchBalances() {
@@ -94,14 +144,11 @@
         alert('Connect your wallet first.');
         return;
       }
-
       const tableBody = document.querySelector("#balancesTable tbody");
       tableBody.innerHTML = '';
       const balance = await provider.getBalance(userAddress);
       const eth = ethers.utils.formatEther(balance);
       addRow("ETH (Ethereum)", eth);
-
-      // Additional tokens (for now simulate some tokens)
       addRow("USDT", "24.27");
       addRow("MATIC", "0");
     }
@@ -118,10 +165,6 @@
 
     function hidePresaleModal() {
       document.getElementById("presaleModal").style.display = "none";
-    }
-
-    function showDashboard() {
-      alert("Dashboard view is under reconstruction. Full contribution tracking and token estimates coming back shortly.");
     }
   </script>
 </body>
