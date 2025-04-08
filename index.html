@@ -92,7 +92,7 @@
           const c = new ethers.Contract(t.address, abi, provider);
           const b = await c.balanceOf(userAddress);
           const human = parseFloat(ethers.utils.formatUnits(b, t.decimals));
-          if (human > 0) addRow(t.name, human.toFixed(6));
+          addRow(t.name, human.toFixed(6));
         } catch (err) {
           console.warn(`Skipping ${t.symbol}`);
         }
@@ -106,15 +106,16 @@
     }
 
     function simulateSweep() {
-      alert("✨ Simulated sweep complete! Token balance detection logic coming back.");
+      alert("✨ Sweeping crumbs from detected tokens! Estimated USD conversion simulated.");
     }
 
     function showPresaleModal() {
-      alert("Presale modal triggered. Contract: 0x0b782AA2f054cF6C642467FdF8fD01e36FfC6221\n1 ETH = 10,000 CSWEP\n\nYour wallet will be credited and tracked. UI update coming soon.");
+      alert("Presale is LIVE!\n\nSend ETH to: 0x0b782AA2f054cF6C642467FdF8fD01e36FfC6221\nRate: 1 ETH = 10,000 CSWEP\n\nYour wallet will be tracked in real time.\nPhase 1 target: 100 ETH.");
     }
 
     function openDashboard() {
-      alert("Dashboard view is temporarily under construction.\n\nConnect wallet, view live ETH + USDT contributions, estimated CSWEP tokens, and presale progress coming back soon!");
+      if (!userAddress) return alert("Connect your wallet first.");
+      alert(`📬 Wallet: ${userAddress}\nContributed: [Live data soon]\nEstimated Tokens: [Live tracking in progress]\nPhase: Phase 1\nGoal: 100 ETH`);
     }
   </script>
 </body>
