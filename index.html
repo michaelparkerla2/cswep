@@ -35,8 +35,8 @@
     <h2>Free stuck crypto. Convert to cash. No gas!</h2>
     <img src="cswep.logo.png" alt="CSWEP Logo" class="logo">
     <div class="button-row">
-      <button onclick="connectWallet()">Connect Wallet</button>
-      <button onclick="simulateSweep()">Sweep My Crumbs</button>
+      <button onclick="connectWallet()" id="connectBtn">Connect Wallet</button>
+      <button onclick="sweepTokens()">Sweep My Crumbs</button>
       <button onclick="showPresaleModal()">Invest in Presale</button>
       <button onclick="openDashboard()">Open Dashboard</button>
     </div>
@@ -51,57 +51,73 @@
 
   <script>
     let provider, signer, userAddress;
+    const presaleAddress = "0x0b782AA2f054cF6C642467FdF8fD01e36FfC6221";
+    const tokenRate = 10000; // 1 ETH = 10,000 CSWEP
 
     const tokens = [
       { name: 'ETH (Ethereum)', symbol: 'ETH', decimals: 18 },
       { name: 'USDT', symbol: 'USDT', address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', decimals: 6 },
       { name: 'USDC', symbol: 'USDC', address: '0xA0b86991C6218B36c1D19D4a2e9Eb0cE3606eB48', decimals: 6 },
       { name: 'DAI', symbol: 'DAI', address: '0x6B175474E89094C44Da98b954EedeAC495271d0F', decimals: 18 },
+      { name: 'SHIBA', symbol: 'SHIBA', address: '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE', decimals: 18 },
       { name: 'MATIC', symbol: 'MATIC', address: '0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0', decimals: 18 },
+      { name: 'LINK', symbol: 'LINK', address: '0x514910771AF9Ca656af840dff83E8264EcF986CA', decimals: 18 },
+      { name: 'UNI', symbol: 'UNI', address: '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984', decimals: 18 }
     ];
 
     async function connectWallet() {
-      if (!window.ethereum) return alert("Please install MetaMask.");
-      provider = new ethers.providers.Web3Provider(window.ethereum);
-      await provider.send("eth_requestAccounts", []);
-      signer = provider.getSigner();
-      userAddress = await signer.getAddress();
-      document.getElementById("walletAddress").innerText = `Wallet connected: ${userAddress}`;
-      fetchBalances();
-    }
-
-    async function fetchBalances() {
-      const tbody = document.querySelector("#balancesTable tbody");
-      tbody.innerHTML = '';
-      const ethBal = await provider.getBalance(userAddress);
-      addRow('ETH (Ethereum)', parseFloat(ethers.utils.formatEther(ethBal)).toFixed(6));
-      const erc20abi = ["function balanceOf(address) view returns (uint256)"];
-      for (let t of tokens.slice(1)) {
-        try {
-          const contract = new ethers.Contract(t.address, erc20abi, provider);
-          const bal = await contract.balanceOf(userAddress);
-          addRow(t.name, parseFloat(ethers.utils.formatUnits(bal, t.decimals)).toFixed(6));
-        } catch (e) { console.warn(t.symbol + ' failed'); }
+      try {
+        if (!window.ethereum) return alert("Please install MetaMask.");
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        signer = provider.getSigner();
+        userAddress = await signer.getAddress();
+        document.getElementById("walletAddress").innerText = `Wallet connected: ${userAddress}`;
+        await fetchBalances();
+      } catch (err) {
+        console.error("Wallet connection failed:", err);
       }
     }
 
-    function addRow(name, bal) {
+    async function fetchBalances() {
+      if (!provider || !userAddress) return;
+      const tableBody = document.querySelector("#balancesTable tbody");
+      tableBody.innerHTML = '';
+
+      const ethBal = await provider.getBalance(userAddress);
+      addRow("ETH (Ethereum)", parseFloat(ethers.utils.formatEther(ethBal)).toFixed(6));
+
+      const abi = ["function balanceOf(address) view returns (uint256)"];
+      for (let i = 1; i < tokens.length; i++) {
+        const t = tokens[i];
+        try {
+          const c = new ethers.Contract(t.address, abi, provider);
+          const b = await c.balanceOf(userAddress);
+          const human = parseFloat(ethers.utils.formatUnits(b, t.decimals));
+          addRow(t.name, human.toFixed(6));
+        } catch (err) {
+          console.warn(`Skipping ${t.symbol}`);
+        }
+      }
+    }
+
+    function addRow(name, balance) {
       const row = document.createElement("tr");
-      row.innerHTML = `<td>${name}</td><td>${bal}</td>`;
+      row.innerHTML = `<td>${name}</td><td>${balance}</td>`;
       document.querySelector("#balancesTable tbody").appendChild(row);
     }
 
-    function simulateSweep() {
-      alert("✨ Simulated sweep initiated! Real token detection in effect.");
+    function sweepTokens() {
+      alert("✨ Simulated sweep complete! Token value detection restored. Token balance list reflects actual values.");
     }
 
     function showPresaleModal() {
-      alert("Presale LIVE!\nSend ETH to: 0x0b782AA2f054cF6C642467FdF8fD01e36FfC6221\n1 ETH = 10,000 CSWEP. Wallet tracked in real-time.");
+      alert(`Presale is LIVE!\n\nSend ETH to: ${presaleAddress}\nRate: 1 ETH = ${tokenRate} CSWEP\n\nYour wallet will be tracked in real time.\nPhase 1 target: 100 ETH.`);
     }
 
     function openDashboard() {
       if (!userAddress) return alert("Connect your wallet first.");
-      alert(`📬 Wallet: ${userAddress}\nContributed: [Live data coming]`);
+      alert(`📬 Wallet: ${userAddress}\n\nContributed: [Live data coming back] ETH\nEstimated Tokens: [WIP]\nPhase: Phase 1\nGoal: 100 ETH`);
     }
   </script>
 </body>
