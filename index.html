@@ -53,12 +53,17 @@
   let provider, signer, userAddress;
 
   document.getElementById("connectBtn").addEventListener("click", async function () {
-    if (!window.ethereum) return alert("MetaMask not detected. Please install it.");
+    if (typeof window.ethereum === 'undefined') {
+      alert("MetaMask not detected. Please install it.");
+      return;
+    }
+
     try {
+      await window.ethereum.request({ method: 'eth_requestAccounts' });
       provider = new ethers.providers.Web3Provider(window.ethereum);
-      await provider.send("eth_requestAccounts", []);
       signer = provider.getSigner();
       userAddress = await signer.getAddress();
+
       document.getElementById("walletAddress").textContent = `Connected: ${userAddress}`;
 
       const balance = await provider.getBalance(userAddress);
@@ -67,7 +72,7 @@
       table.innerHTML = `<tr><td>ETH</td><td>${eth}</td></tr>`;
     } catch (err) {
       console.error("Wallet connection failed", err);
-      alert("Failed to connect wallet.");
+      alert("Wallet connection failed: " + (err.message || "Unknown error"));
     }
   });
 </script>
