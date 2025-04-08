@@ -71,7 +71,7 @@
         signer = provider.getSigner();
         userAddress = await signer.getAddress();
         document.getElementById("walletAddress").innerText = `Wallet connected: ${userAddress}`;
-        fetchBalances();
+        await fetchBalances();
       } catch (err) {
         console.error("Wallet connection failed:", err);
       }
@@ -106,7 +106,7 @@
     }
 
     function sweepTokens() {
-      alert("✨ Simulated sweep complete! Token value detection restored.");
+      alert("✨ Simulated sweep complete! Token value detection restored. Token balance list reflects actual values.");
     }
 
     function showPresaleModal() {
